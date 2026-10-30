@@ -248,6 +248,17 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
 @media(max-width:760px){.home-record-compact{min-height:unset}}
 
 /* Music library */
+.music-left-column{display:flex;flex-direction:column;gap:14px;min-width:0}
+.music-quick-timer{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:18px}
+.music-quick-timer h3{margin:0;font-size:15px}
+.music-timer-clock{font-size:clamp(38px,4vw,54px);font-weight:800;text-align:center;font-variant-numeric:tabular-nums;margin:18px 0}
+.music-timer-inputs{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.music-timer-inputs label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.music-timer-actions{display:flex;gap:6px;margin-top:13px}
+.music-timer-actions button{flex:1;min-width:0;padding:10px 3px;font-size:12px}
+.alarm-dismiss{position:fixed;z-index:10000;bottom:20px;left:50%;transform:translateX(-50%);width:min(440px,calc(100vw - 28px));padding:12px 15px;border-radius:15px;border:1px solid var(--accent);background:var(--panel);box-shadow:0 12px 42px #0003;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.alarm-dismiss[hidden]{display:none!important}
+.alarm-dismiss button{flex-shrink:0}
 .music-shell{display:grid;grid-template-columns:minmax(210px,.34fr) minmax(0,1fr);gap:16px;align-items:start}
 .music-sidebar,.music-main{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:18px;min-width:0}
 .music-section-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
@@ -524,10 +535,19 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
 <section class="view" id="musicView">
   <div class="view-top"><div><div class="eyebrow">MUSIC LIBRARY</div><h2>음악</h2><p class="tool-note">내 음악 파일을 등록하고 플레이리스트를 만들 수 있습니다. 인터넷 없이도 재생됩니다.</p></div><button class="backbtn" data-view="homeView">← 홈으로</button></div>
   <div class="music-shell">
+    <div class="music-left-column">
     <div class="music-sidebar">
       <div class="music-section-top"><h3>플레이리스트</h3><button class="ghost" id="musicNewList">＋ 새 목록</button></div>
       <div class="music-collection" id="musicPlaylists"></div>
       <p class="music-help">목록은 ☰ 손잡이를 잡아 끌어 순서를 바꿀 수 있습니다. 이름 변경도 가능합니다.</p>
+    </div>
+    <section class="music-quick-timer" aria-label="음악 화면 타이머">
+      <div class="music-section-top"><h3>타이머</h3><button class="ghost" type="button" data-view="timerView" style="font-size:12px;padding:7px 10px">상세 설정 ↗</button></div>
+      <div id="musicTimerDisplay" class="music-timer-clock">15:00</div>
+      <div class="music-timer-inputs"><div><label for="musicTimerMin">분</label><input id="musicTimerMin" type="number" min="0" max="999" value="15"></div><div><label for="musicTimerSec">초</label><input id="musicTimerSec" type="number" min="0" max="59" value="0"></div></div>
+      <div class="music-timer-actions"><button id="musicTimerStart" class="primary" type="button">시작</button><button id="musicTimerPause" type="button">일시정지</button><button id="musicTimerReset" class="ghost" type="button">초기화</button></div>
+      <p class="music-help">기존 타이머와 연동됩니다. 알람은 최대 3분간 울립니다.</p>
+    </section>
     </div>
     <div class="music-main">
       <div class="music-section-top"><h3 id="musicSelectedName">내 플레이리스트</h3><span id="musicTrackCount" class="tool-note">0곡</span></div>
@@ -554,6 +574,7 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
     </div>
   </div>
 </section>
+<div id="alarmDismiss" class="alarm-dismiss" hidden role="status"><strong>타이머 종료 · 알람 재생 중</strong><button type="button" class="primary" id="alarmDismissBtn">알람 끄기</button></div>
 <section class="view" id="miniGamesView">
  <div class="view-top"><div><div class="eyebrow">MINI GAMES</div><h2>미니게임</h2><p class="tool-note">게임 카드를 클릭하면 아래에서 바로 실행됩니다. 게임마다 독립된 화면에서 진행됩니다.</p></div><button class="backbtn" data-view="homeView">← 홈으로</button></div>
  <div class="hg-games-grid">
@@ -828,7 +849,7 @@ function enableScheduleNotifications(){if(!('Notification'in window)){showToast(
 function renderCalendar(){const y=monthCursor.getFullYear(),m=monthCursor.getMonth();$('#monthTitle').textContent=`${y}년 ${m+1}월`;const grid=$('#calendarGrid');grid.replaceChildren();const first=new Date(y,m,1),start=new Date(y,m,1-first.getDay());for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const ds=localDate(d),btn=document.createElement('button');btn.className='day-cell'+(d.getMonth()!==m?' muted':'')+(ds===selectedDate?' selected':'')+(ds===localDate()?' today':'');const num=document.createElement('div');num.className='day-num';num.textContent=d.getDate();btn.append(num);if(state.events.some(e=>e.date===ds)||sharedEvents.some(e=>e.event_date===ds)){const dot=document.createElement('div');dot.className='dot';btn.append(dot)}btn.onclick=()=>{selectedDate=ds;renderCalendar();renderSelectedDay()};grid.append(btn)}renderSelectedDay()}
 function renderSelectedDay(){if(!$('#selectedDateTitle'))return;$('#selectedDateTitle').textContent=fmtDate(selectedDate);const evs=sortedEvents(selectedDate);$('#selectedDateSub').textContent=`일정 ${evs.length}개 · 완료 ${evs.filter(e=>e.done).length}개`;const box=$('#selectedDayEvents');box.replaceChildren();if(!evs.length){const p=document.createElement('div');p.className='empty';p.textContent='개인 일정이 없습니다.';box.append(p)}else evs.forEach(e=>box.append(eventNode(e)));appendShared(box,selectedDate)}
 $('#prevMonth').onclick=()=>{monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()-1,1);renderCalendar()};$('#nextMonth').onclick=()=>{monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()+1,1);renderCalendar()};
-function updateTimerUI(){let rem=state.timer.remaining;if(state.timer.running){rem=Math.max(0,Math.ceil((state.timer.deadline-Date.now())/1000));state.timer.remaining=rem;if(rem<=0){state.timer.running=false;state.timer.remaining=0;state.timer.deadline=0;persist();alarm();showToast('타이머가 종료되었습니다.');if(timerInterval){clearInterval(timerInterval);timerInterval=null}}}const m=Math.floor(rem/60),s=rem%60;const clock=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;$('#timerDisplay').textContent=clock;if($('#timerFullDisplay')&&mode!=='stopwatch')$('#timerFullDisplay').textContent=clock;$('#timerMin').value=Math.floor(state.timer.duration/60);$('#timerSec').value=state.timer.duration%60;if($('#timerFullMin'))$('#timerFullMin').value=Math.floor(state.timer.duration/60);if($('#timerFullSec'))$('#timerFullSec').value=state.timer.duration%60;$('#timerStart').textContent=state.timer.running?'실행 중':'시작';if($('#timerFullStart'))$('#timerFullStart').textContent=state.timer.running?'실행 중':'시작';if($('#timerFullCaption')&&mode!=='stopwatch')$('#timerFullCaption').textContent=state.timer.running?'시간이 흐르는 중':(rem===0?'시간이 다 되었습니다':'준비되면 시작하세요');if($('#waveOrb')&&mode!=='stopwatch'){$('#waveOrb').classList.toggle('running',state.timer.running);const progress=state.timer.duration?Math.max(0,Math.min(100,(1-rem/state.timer.duration)*100)):0;$('#waveOrb').style.setProperty('--progress',progress+'%')}}
+function updateTimerUI(){let rem=state.timer.remaining;if(state.timer.running){rem=Math.max(0,Math.ceil((state.timer.deadline-Date.now())/1000));state.timer.remaining=rem;if(rem<=0){state.timer.running=false;state.timer.remaining=0;state.timer.deadline=0;persist();alarm();showToast('타이머가 종료되었습니다.');if(timerInterval){clearInterval(timerInterval);timerInterval=null}}}const m=Math.floor(rem/60),s=rem%60;const clock=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;$('#timerDisplay').textContent=clock;if($('#musicTimerDisplay')){$('#musicTimerDisplay').textContent=clock;$('#musicTimerStart').textContent=state.timer.running?'실행 중':'시작';if(document.activeElement!==$('#musicTimerMin'))$('#musicTimerMin').value=Math.floor(state.timer.duration/60);if(document.activeElement!==$('#musicTimerSec'))$('#musicTimerSec').value=state.timer.duration%60;}if($('#timerFullDisplay')&&mode!=='stopwatch')$('#timerFullDisplay').textContent=clock;$('#timerMin').value=Math.floor(state.timer.duration/60);$('#timerSec').value=state.timer.duration%60;if($('#timerFullMin'))$('#timerFullMin').value=Math.floor(state.timer.duration/60);if($('#timerFullSec'))$('#timerFullSec').value=state.timer.duration%60;$('#timerStart').textContent=state.timer.running?'실행 중':'시작';if($('#timerFullStart'))$('#timerFullStart').textContent=state.timer.running?'실행 중':'시작';if($('#timerFullCaption')&&mode!=='stopwatch')$('#timerFullCaption').textContent=state.timer.running?'시간이 흐르는 중':(rem===0?'시간이 다 되었습니다':'준비되면 시작하세요');if($('#waveOrb')&&mode!=='stopwatch'){$('#waveOrb').classList.toggle('running',state.timer.running);const progress=state.timer.duration?Math.max(0,Math.min(100,(1-rem/state.timer.duration)*100)):0;$('#waveOrb').style.setProperty('--progress',progress+'%')}}
 function timerFromInputs(){stopAlarmSound();const min=Math.max(0,Math.min(999,Number($('#timerMin').value)||0)),sec=Math.max(0,Math.min(59,Number($('#timerSec').value)||0));state.timer.duration=min*60+sec;state.timer.remaining=state.timer.duration;state.timer.running=false;state.timer.deadline=0;if(timerInterval){clearInterval(timerInterval);timerInterval=null}persist();updateTimerUI()}
 $('#timerMin').onchange=timerFromInputs;$('#timerSec').onchange=timerFromInputs;
 $('#timerStart').onclick=()=>{if(state.timer.running)return;if(state.timer.remaining<=0)timerFromInputs();if(state.timer.remaining<=0){showToast('1초 이상 시간을 설정하세요.');return}state.timer.running=true;state.timer.deadline=Date.now()+state.timer.remaining*1000;persist();if(timerInterval)clearInterval(timerInterval);timerInterval=setInterval(updateTimerUI,200);updateTimerUI()};
@@ -837,6 +858,9 @@ $('#timerReset').onclick=()=>{stopAlarmSound();state.timer.running=false;state.t
 function syncFullTimerInputs(){ $('#timerMin').value=$('#timerFullMin').value;$('#timerSec').value=$('#timerFullSec').value;timerFromInputs() }
 $('#timerFullMin').onchange=syncFullTimerInputs;$('#timerFullSec').onchange=syncFullTimerInputs;
 $('#timerFullStart').onclick=()=>$('#timerStart').click();$('#timerFullPause').onclick=()=>$('#timerPause').click();$('#timerFullReset').onclick=()=>$('#timerReset').click();
+function syncMusicTimerInputs(){$('#timerMin').value=$('#musicTimerMin').value;$('#timerSec').value=$('#musicTimerSec').value;timerFromInputs()}
+$('#musicTimerMin').onchange=syncMusicTimerInputs;$('#musicTimerSec').onchange=syncMusicTimerInputs;
+$('#musicTimerStart').onclick=()=>$('#timerStart').click();$('#musicTimerPause').onclick=()=>$('#timerPause').click();$('#musicTimerReset').onclick=()=>$('#timerReset').click();
 function renderPresets(){const root=$('#timerPresets');root.replaceChildren();(state.timerPresets||[1,5,10,15,25,30]).forEach(min=>{const b=document.createElement('button');b.textContent=min+'분';b.onclick=()=>{$('#timerMin').value=min;$('#timerSec').value=0;timerFromInputs();showToast(min+'분 타이머를 설정했습니다.')};root.append(b)})}
 $('#editPresets').onclick=()=>{const current=(state.timerPresets||[1,5,10,15,25,30]).join(', '),raw=prompt('원하는 프리셋을 분 단위로 쉼표로 구분해 입력하세요. (예: 3, 10, 15, 45)',current);if(raw===null)return;const values=[...new Set(raw.split(',').map(x=>Number(x.trim())).filter(x=>Number.isInteger(x)&&x>0&&x<=999))].slice(0,18);if(!values.length){showToast('1~999 사이의 정수를 입력하세요.');return}state.timerPresets=values;renderPresets();persist()};
 let sw={elapsed:0,startedAt:0,running:false,laps:[]},swTick=null,mode='timer';
@@ -855,18 +879,34 @@ $('#timerFullAudioSettings').onclick=()=>$('#audioFile').click();$('#fullClearAu
 // Browsers cannot reliably identify the physical audio output (e.g. wired headphones).
 // Respect the OS output selection; do not suppress the alarm on an unreliable heuristic.
 async function headphonesConnected(){return true}
-let alarmAudioContexts=[];let alarmCloseTimers=[];
+let alarmAudioContexts=[];let alarmRepeatTimer=null;let alarmDeadlineTimer=null;let alarmActive=false;
 function stopAlarmSound(){
- const a=$('#alarmAudio');try{a.pause();a.currentTime=0}catch(e){}
- alarmCloseTimers.forEach(id=>clearTimeout(id));alarmCloseTimers=[];
+ alarmActive=false;
+ if(alarmRepeatTimer!==null){clearInterval(alarmRepeatTimer);alarmRepeatTimer=null}
+ if(alarmDeadlineTimer!==null){clearTimeout(alarmDeadlineTimer);alarmDeadlineTimer=null}
+ const notice=$('#alarmDismiss');if(notice)notice.hidden=true;
+ const a=$('#alarmAudio');try{a.pause();a.loop=false;a.currentTime=0}catch(e){}
  alarmAudioContexts.forEach(ctx=>{try{ctx.close().catch(()=>{})}catch(e){}});alarmAudioContexts=[];
 }
-async function alarm(){stopAlarmSound();const a=$('#alarmAudio');if(state.audioData){a.src=state.audioData;a.volume=state.volume/100;a.currentTime=0;a.play().catch(()=>showToast('소리 재생이 차단되었습니다. 소리 미리 듣기를 눌러 주세요.'))}else{try{const ctx=new (window.AudioContext||window.webkitAudioContext)();alarmAudioContexts.push(ctx);const start=ctx.currentTime;for(let repeat=0;repeat<8;repeat++){[880,660,880].forEach((hz,i)=>{const at=start+repeat*1.05+i*.25,o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=hz;g.gain.setValueAtTime(state.volume/100*.18,at);g.gain.exponentialRampToValueAtTime(.001,at+.2);o.connect(g);g.connect(ctx.destination);o.start(at);o.stop(at+.22)})}alarmCloseTimers.push(setTimeout(()=>{ctx.close().catch(()=>{});alarmAudioContexts=alarmAudioContexts.filter(x=>x!==ctx)},9000))}catch(e){showToast('이 브라우저에서는 알림음을 재생할 수 없습니다.')}}}
+function defaultAlarmChime(ctx){
+ const start=ctx.currentTime+.02;
+ [880,660,880].forEach((hz,i)=>{const at=start+i*.25,o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=hz;g.gain.setValueAtTime(Math.max(.001,state.volume/100*.18),at);g.gain.exponentialRampToValueAtTime(.001,at+.2);o.connect(g);g.connect(ctx.destination);o.start(at);o.stop(at+.22)});
+}
+async function alarm(){
+ stopAlarmSound();
+ const music=$('#musicAudio');if(music&&!music.paused)music.pause();
+ alarmActive=true;$('#alarmDismiss').hidden=false;
+ alarmDeadlineTimer=setTimeout(stopAlarmSound,180000);
+ const a=$('#alarmAudio');
+ if(state.audioData){a.src=state.audioData;a.loop=true;a.volume=state.volume/100;a.currentTime=0;a.play().catch(()=>showToast('소리 재생이 차단되었습니다. 소리 미리 듣기를 눌러 주세요.'))}
+ else{try{const ctx=new (window.AudioContext||window.webkitAudioContext)();alarmAudioContexts.push(ctx);await ctx.resume();if(!alarmActive)return;defaultAlarmChime(ctx);alarmRepeatTimer=setInterval(()=>{if(alarmActive)defaultAlarmChime(ctx)},1050)}catch(e){stopAlarmSound();showToast('이 브라우저에서는 알림음을 재생할 수 없습니다.')}}
+}
+$('#alarmDismissBtn').onclick=stopAlarmSound;
 function updateAudioStatus(){ $('#volume').value=state.volume;$('#volumeLabel').textContent=state.volume+'%';if($('#fullVolume')){$('#fullVolume').value=state.volume;$('#fullVolumeLabel').textContent=state.volume+'%';$('#fullHeadphone').checked=state.headphoneOnly!==false}$('#audioStatus').textContent=state.audioData?`선택된 음악: ${state.audioName||'업로드 파일'}`:'기본 알림음이 설정되어 있습니다.';if(state.audioData)$('#alarmAudio').src=state.audioData}
 $('#headphoneOnly').checked=state.headphoneOnly;$('#homeHeadphone').checked=state.headphoneOnly!==false;$('#homeHeadphone').onchange=()=>{$('#headphoneOnly').checked=$('#homeHeadphone').checked;$('#headphoneOnly').onchange()};$('#headphoneOnly').onchange=()=>{state.headphoneOnly=$('#headphoneOnly').checked;$('#homeHeadphone').checked=state.headphoneOnly;$('#fullHeadphone').checked=state.headphoneOnly;persist();showToast(state.headphoneOnly?'이어폰 감지 모드를 켰습니다.':'기기 스피커에서도 알람을 허용합니다.')};
 $('#volume').oninput=()=>{state.volume=Number($('#volume').value);$('#volumeLabel').textContent=state.volume+'%';$('#fullVolumeLabel').textContent=state.volume+'%';$('#alarmAudio').volume=state.volume/100;persistSoon()};
 $('#audioFile').onchange=async()=>{const f=$('#audioFile').files[0];if(!f)return;if(f.size>12*1024*1024){showToast('음악 파일은 12MB 이하로 선택해 주세요.');$('#audioFile').value='';return}const reader=new FileReader();reader.onload=async()=>{state.audioData=reader.result;state.audioName=f.name;await persist();updateAudioStatus();showToast('음악 파일을 저장했습니다.')};reader.onerror=()=>showToast('파일을 읽지 못했습니다.');reader.readAsDataURL(f)};
-$('#clearAudio').onclick=async()=>{state.audioData='';state.audioName='';$('#audioFile').value='';$('#alarmAudio').pause();await persist();updateAudioStatus();showToast('기본 알림음으로 변경했습니다.')};
+$('#clearAudio').onclick=async()=>{stopAlarmSound();state.audioData='';state.audioName='';$('#audioFile').value='';$('#alarmAudio').pause();await persist();updateAudioStatus();showToast('기본 알림음으로 변경했습니다.')};
 $('#testSound').onclick=()=>alarm();
 let calcExpr='0',calcDone=false;
 function renderCalcHistory(){
