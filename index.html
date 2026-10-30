@@ -366,6 +366,26 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
 @media(max-width:1190px){#homeView .home-lower-grid{grid-template-columns:minmax(170px,.75fr) minmax(230px,1.15fr) minmax(220px,1fr);gap:10px}}
 @media(max-width:930px){#homeView .dashboard{grid-template-columns:repeat(2,minmax(0,1fr))}#homeView #timerPanel{grid-column:1 / -1}#homeView .home-lower-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#homeView .home-links-card{grid-column:1 / -1}#homeView .home-links-card .home-quicklinks{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:640px){#homeView .dashboard,#homeView .home-lower-grid{grid-template-columns:1fr}#homeView #timerPanel,#homeView .home-links-card{grid-column:auto}#homeView .home-links-card .home-quicklinks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Cloud accounts and shared school schedules */
+.cloud-shared-tag{font-size:10px;font-weight:750;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);background:var(--accent2);border-radius:7px;padding:3px 6px;white-space:nowrap}
+.shared-event{background:color-mix(in srgb,var(--accent) 5%,var(--panel));border-left:3px solid var(--accent);padding:9px;border-radius:11px}
+.shared-event-title{font-size:13px;font-weight:750;overflow-wrap:anywhere}
+.shared-event-info{font-size:11px;color:var(--muted);margin-top:4px;white-space:pre-line;overflow-wrap:anywhere}
+.shared-day-group{margin:8px 0;display:grid;gap:7px}
+.shared-day-group-title{font-size:11px;color:var(--accent);font-weight:800;margin-top:5px}
+.shared-admin-panel{margin:18px 0;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}
+.shared-admin-panel h3{margin:0 0 8px;font-size:16px}
+.shared-admin-form{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+.shared-admin-form input,.shared-admin-form textarea{background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px;min-width:0;width:100%;font:inherit}
+.shared-admin-form textarea{grid-column:1/-1;min-height:65px}
+.shared-admin-buttons{display:flex;gap:7px;flex-wrap:wrap}
+.shared-admin-list{display:grid;gap:7px;margin-top:10px;max-height:300px;overflow:auto}
+.shared-admin-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:var(--bg)}
+.shared-admin-row span{flex:1;min-width:0;overflow-wrap:anywhere;font-size:12px}
+.shared-admin-row button{flex:none}
+.cloud-sync-note{font-size:11px;color:var(--muted);padding:8px 10px;background:var(--bg);border-radius:9px;margin-top:9px}
+@media(max-width:600px){.shared-admin-form{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -437,7 +457,20 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
 <div class="recording-layout"><section class="recording-card"><div class="recording-status"><span class="recording-dot" id="recordDot"></span><span id="recordStatus">녹음 대기 중</span></div><div class="recording-clock" id="recordClock">00:00</div><div class="audio-meter" aria-label="실시간 마이크 음량"><div class="audio-meter-top"><span>마이크 음량 · 실시간 파형</span><strong id="recordDb">대기 중</strong></div><div class="audio-bars" id="recordBars" aria-hidden="true"></div><div class="audio-meter-foot">dBFS는 디지털 입력 기준 상대 음량이며, 실제 소음계의 dB SPL과 다릅니다.</div></div><div class="recording-actions"><button class="primary" id="recordStart">● 녹음 시작</button><button id="recordPause" disabled>일시정지</button><button class="danger" id="recordStop" disabled>녹음 종료</button></div><div style="margin-top:20px"><label for="speechLanguage">음성 인식 언어</label><select id="speechLanguage"><option value="ko-KR">한국어</option><option value="en-US">영어 (미국)</option><option value="ja-JP">일본어</option><option value="zh-CN">중국어</option></select></div><div class="recording-hint">녹음은 브라우저의 마이크 권한이 필요합니다. 자동 음성 인식은 Chrome 등 지원 브라우저에서 동작하며, 브라우저/기기 설정에 따라 인터넷 연결이 필요할 수 있습니다. 자막은 인식 결과를 기반으로 생성되므로 정확도를 검토해 주세요.</div><div class="transcript-tools"><button id="chooseRecordFolder">저장 폴더 선택</button><span id="recordFolderStatus" class="recording-hint">기본 다운로드 위치 사용</span><button id="downloadAudio" disabled>원본 저장</button><button id="downloadMp3" disabled>MP3 저장</button><button id="downloadSrt" disabled>SRT 자막 저장</button><button id="downloadVtt" disabled>VTT 자막 저장</button><button id="downloadTxt" disabled>TXT 저장</button></div></section>
 <section class="recording-card"><div class="panel-head"><div><h3 style="margin:0">실시간 자막</h3><p>녹음 중 인식된 음성이 여기에 표시됩니다.</p></div><button class="ghost" id="clearTranscript">내용 지우기</button></div><div class="transcript-box" id="transcriptBox" aria-live="polite"><span style="color:var(--muted)">녹음을 시작하면 인식된 문장이 여기에 표시됩니다.</span></div><p class="recording-hint" id="speechStatus">자막 파일은 SRT/VTT 형식으로 내보낼 수 있습니다. 음성 인식 기능을 지원하지 않는 브라우저에서는 오디오 녹음만 가능합니다.</p></section></div>
 </section>
-<section class="view" id="calendarView"><div class="view-top"><div><h2>일정 달력</h2><p class="tool-note">날짜를 선택해 일정을 추가하거나 확인하세요. 완료 체크는 날짜가 지나도 유지됩니다.</p></div><button class="backbtn" data-view="homeView">← 홈으로</button></div><div class="calendar-layout"><div class="calendar-card"><div class="month-nav"><button id="prevMonth">‹ 이전</button><strong id="monthTitle"></strong><button id="nextMonth">다음 ›</button></div><div class="weekdays"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div><div class="calendar-grid" id="calendarGrid"></div></div><div class="day-card"><h3 id="selectedDateTitle"></h3><div class="sub" id="selectedDateSub"></div><button class="primary" id="addSelectedBtn" style="width:100%">＋ 이 날짜에 일정 추가</button><div class="day-events" id="selectedDayEvents"></div></div></div></section>
+<section class="view" id="calendarView"><div class="view-top"><div><h2>일정 달력</h2><p class="tool-note">날짜를 선택해 일정을 추가하거나 확인하세요. 완료 체크는 날짜가 지나도 유지됩니다.</p></div><button class="backbtn" data-view="homeView">← 홈으로</button></div><div class="calendar-layout"><div class="calendar-card"><div class="month-nav"><button id="prevMonth">‹ 이전</button><strong id="monthTitle"></strong><button id="nextMonth">다음 ›</button></div><div class="weekdays"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div><div class="calendar-grid" id="calendarGrid"></div></div><div class="day-card"><h3 id="selectedDateTitle"></h3><div class="sub" id="selectedDateSub"></div><button class="primary" id="addSelectedBtn" style="width:100%">＋ 이 날짜에 일정 추가</button><div class="day-events" id="selectedDayEvents"></div></div></div><div class="shared-admin-panel" id="sharedAdminPanel" hidden>
+ <h3>관리자 · 전체 사용자 공통 일정</h3>
+ <p class="tool-note">여기에서 등록한 일정은 로그인한 모든 사용자에게 표시됩니다. 관리자만 등록, 수정 및 삭제할 수 있습니다.</p>
+ <div class="shared-admin-form">
+  <input id="sharedTitle" maxlength="120" placeholder="공통 일정 제목" aria-label="공통 일정 제목">
+  <input id="sharedDate" type="date" aria-label="공통 일정 날짜">
+  <input id="sharedTime" type="time" aria-label="공통 일정 시간 (선택)">
+  <input id="sharedLocation" maxlength="120" placeholder="장소 (선택)" aria-label="장소">
+  <textarea id="sharedDetail" maxlength="2000" placeholder="안내 및 준비물 (선택)" aria-label="상세 내용"></textarea>
+ </div>
+ <div class="shared-admin-buttons"><button class="primary" type="button" id="sharedSave">공통 일정 등록</button><button class="ghost" type="button" id="sharedCancel" hidden>수정 취소</button><button class="ghost" type="button" id="sharedReload">목록 새로고침</button></div>
+ <p class="cloud-status" id="sharedAdminStatus"></p><div class="shared-admin-list" id="sharedAdminList"></div>
+</div>
+</section>
 <section class="view" id="calcView"><div class="view-top"><h2>계산기</h2><button class="backbtn" data-view="homeView">← 홈으로</button></div><div class="calc-layout"><div class="tool-card"><input class="calc-screen" id="calcScreen" value="0" aria-label="계산식 또는 결과"><div style="display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap"><label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted)">각도 <select id="angleMode" style="width:auto;padding:6px 10px"><option value="DEG">DEG</option><option value="RAD">RAD</option></select></label><span class="tool-note">Enter = 계산 · ^ = 거듭제곱</span></div><div class="calc-grid" id="calcKeys"><button class="operator" data-key="AC">AC</button><button class="operator" data-key="DEL">⌫</button><button class="operator" data-key="(">(</button><button class="operator" data-key=")">)</button><button class="operator" data-key="Ans">Ans</button><button data-key="sin(">sin</button><button data-key="cos(">cos</button><button data-key="tan(">tan</button><button data-key="asin(">sin⁻¹</button><button data-key="acos(">cos⁻¹</button><button data-key="atan(">tan⁻¹</button><button data-key="log(">log</button><button data-key="ln(">ln</button><button data-key="sqrt(">√</button><button data-key="^">xʸ</button><button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button><button data-key="/">÷</button><button data-key="π">π</button><button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button><button data-key="*">×</button><button data-key="e">e</button><button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button><button data-key="-">−</button><button data-key="!">n!</button><button data-key="0">0</button><button data-key=".">.</button><button data-key="%">%</button><button data-key="+">+</button><button class="equal" data-key="=">=</button><button data-key="abs(">abs</button><button data-key="exp(">exp</button><button data-key="floor(">floor</button><button data-key="ceil(">ceil</button><button data-key="round(">round</button></div></div><aside class="tool-card calc-history-panel"><div class="panel-head"><div><h3 style="margin:0">계산 기록</h3><p>계산 결과를 선택하면 다시 불러옵니다.</p></div><button class="ghost" id="clearCalcHistory" type="button">전체 삭제</button></div><div id="calcHistoryList" class="calc-history-list"><p class="tool-note">계산 기록이 없습니다.</p></div></aside><button class="ghost calc-help-toggle" id="calcHelpToggle">계산기 사용법 보기</button><div class="tool-card calc-help hidden" id="calcHelp"><p class="tool-note">지원 함수: sin, cos, tan, 역삼각함수, sinh/cosh/tanh, log, ln, sqrt, cbrt, abs, exp, floor, ceil, round, min, max, pow, 팩토리얼(!), 상수 π·e, 괄호와 사칙연산. 예: sin(30), log(100), sqrt(2), 5!, 2^8. 각도는 DEG/RAD를 선택하세요.</p></div></section>
 <section class="view" id="byteView"><div class="view-top"><h2>바이트 계산기</h2><button class="backbtn" data-view="homeView">← 홈으로</button></div><div class="tool-card"><p class="tool-note">기준: 한글 3바이트, 영어·숫자·특수문자·공백 1바이트, 엔터(줄바꿈) 2바이트. 입력 중인 내용은 자동 저장되며, 저장 버튼을 누르면 별도 기록으로 보관됩니다.</p><textarea id="byteText" rows="12" placeholder="글자를 입력하거나 붙여 넣으세요."></textarea><div class="byte-result"><div class="metric"><span>공백 제외</span><strong><b id="charNoSpace">0</b> 자</strong></div><div class="metric"><span>공백 포함</span><strong><b id="charWithSpace">0</b> 자</strong></div><div class="metric"><span>바이트</span><strong><b id="byteCount">0</b> byte</strong></div></div><div class="byte-actions"><button class="primary" id="saveByteRecord">저장</button><button id="clearByteText">입력창 비우기</button></div><p class="tool-note" id="byteSaveStatus" aria-live="polite">입력 내용은 이 브라우저에 자동 저장됩니다.</p><p class="tool-note">공백 제외 글자 수는 공백과 줄바꿈을 제외해 계산합니다. 바이트 수는 지정한 규칙을 기준으로 계산합니다.</p></div><div class="tool-card" style="margin-top:16px"><div class="panel-head"><div><h3 style="margin:0">저장한 기록</h3><p>필요한 기록을 다시 불러오거나 삭제할 수 있습니다.</p></div><span class="tool-note" id="byteRecordCount">0개</span></div><div id="byteRecords" class="byte-records"><p class="tool-note">아직 저장한 기록이 없습니다.</p></div></div></section>
 <section class="view" id="notesView"><div class="view-top"><div><h2>메모장</h2><p class="tool-note">메모는 자동 저장됩니다. 제목으로 검색할 수 있습니다.</p></div><button class="backbtn" data-view="homeView">← 홈으로</button></div><div class="notes-layout"><aside class="notes-sidebar"><button class="primary" id="newNoteBtn" style="width:100%">＋ 새 메모</button><input id="noteSearch" placeholder="제목 검색..." style="margin-top:10px"><div class="notes-list" id="notesList"></div></aside><section class="note-editor"><div id="editorEmpty" class="empty">메모를 선택하거나 새 메모를 만들어 주세요.</div><div id="editorPane" class="hidden"><input class="note-title" id="noteTitle" placeholder="메모 제목"><div class="editor-toolbar"><button data-cmd="bold"><b>B</b></button><button data-cmd="italic"><i>I</i></button><button data-cmd="underline"><u>U</u></button><button type="button" id="fontMinus" title="글자 크기 줄이기">−</button><input id="fontPx" type="number" min="8" max="96" value="16" style="width:76px;padding:6px" aria-label="글자 크기 픽셀"><span style="font-size:12px;color:var(--muted)">px</span><button type="button" id="fontPlus" title="글자 크기 키우기">＋</button><div class="palette" id="colorPalette" style="display:flex;gap:5px;flex-wrap:wrap;align-items:center"><button type="button" data-color="#292824" title="검정" style="background:#292824;width:22px;height:22px;padding:0;border-radius:50%"></button><button type="button" data-color="#d97745" title="주황" style="background:#d97745;width:22px;height:22px;padding:0;border-radius:50%"></button><button type="button" data-color="#d94841" title="빨강" style="background:#d94841;width:22px;height:22px;padding:0;border-radius:50%"></button><button type="button" data-color="#e6a23c" title="노랑" style="background:#e6a23c;width:22px;height:22px;padding:0;border-radius:50%"></button><button type="button" data-color="#2f855a" title="초록" style="background:#2f855a;width:22px;height:22px;padding:0;border-radius:50%"></button><button type="button" data-color="#3182ce" title="파랑" style="background:#3182ce;width:22px;height:22px;padding:0;border-radius:50%"></button><button type="button" data-color="#805ad5" title="보라" style="background:#805ad5;width:22px;height:22px;padding:0;border-radius:50%"></button><input type="color" id="fontColor" value="#292824" title="맞춤 색상" style="width:30px;height:30px;padding:2px"></div><button data-cmd="removeFormat">서식 지우기</button></div><div id="noteContent" class="note-content" contenteditable="true" spellcheck="false"></div><div class="form-actions"><button class="danger" id="deleteNoteBtn">메모 삭제</button><span class="tool-note" id="noteSaveStatus" style="margin-right:auto;align-self:center">자동 저장</span><button class="primary" id="saveNoteBtn">저장</button></div></div></section></div></section>
@@ -495,12 +528,12 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
 <dialog id="ttDialog" class="tt-dialog"><div class="tt-edit-head"><h2>시간표 설정</h2><button class="ghost" id="ttClose">닫기</button></div><p class="tool-note">과목과 선생님, 각 교시의 시작·종료 시간을 수정할 수 있습니다. 수업 시간은 학교별로 달라 기본값을 임시로 입력했습니다.</p><div class="tt-edit-scroll"><table id="ttEditGrid"><thead><tr><th>교시 / 시간</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th></tr></thead><tbody></tbody></table></div><div class="tt-dialog-actions"><button class="ghost" id="ttRestore">기본 시간표로 복원</button><button class="primary" id="ttSave">변경 사항 저장</button></div></dialog>
 <div class="cloud-overlay" id="cloudOverlay" role="dialog" aria-modal="true" aria-labelledby="cloudTitle"><div class="cloud-dialog">
   <h2 id="cloudTitle">계정 및 클라우드 동기화</h2><p>이메일 계정으로 로그인하면 일정·메모·설정이 기기 간 동기화됩니다. 녹음 파일 자체는 현재 버전에서 클라우드로 전송하지 않습니다.</p>
-  <div class="cloud-warn">먼저 Supabase 프로젝트를 만들고 아래 설정 파일에 프로젝트 URL과 anon/publishable 키를 입력한 뒤 배포해야 합니다. 비밀번호나 service_role 키를 HTML에 넣지 마세요.</div>
+  <div class="cloud-warn">로그인과 동기화는 Supabase 연결 후 사용 가능합니다. 공통 일정은 로그인한 모든 사용자가 조회하며 관리자만 수정합니다. 비밀번호나 service_role 키를 HTML에 입력하지 마세요.</div>
   <label for="cloudEmail">이메일</label><input id="cloudEmail" type="email" autocomplete="username" placeholder="you@example.com">
   <label for="cloudPassword">비밀번호</label><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="비밀번호">
   <div class="cloud-actions"><button class="primary" id="cloudLoginBtn">로그인</button><button id="cloudSignupBtn">계정 만들기</button></div>
   <div class="cloud-actions"><button class="ghost" id="cloudSyncBtn">지금 동기화</button><button class="ghost" id="cloudLogoutBtn">로그아웃</button><button class="ghost" id="cloudCloseBtn">닫기</button></div>
-  <div class="cloud-status" id="cloudStatus">클라우드 설정을 확인하는 중…</div>
+  <div class="cloud-status" id="cloudStatus">클라우드 설정을 확인하는 중…</div><div class="cloud-sync-note">음악/녹음 파일 자체는 동기화되지 않습니다. 일정·메모·설정은 기기 간 동기화되며 여러 기기에서 동시에 수정하면 마지막 저장이 우선할 수 있습니다.</div>
 </div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./supabase-config.js"></script>
@@ -520,10 +553,27 @@ function openDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open
 function dbGet(key){return new Promise((resolve,reject)=>{const r=db.transaction('kv','readonly').objectStore('kv').get(key);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
 function dbSet(key,val){return new Promise((resolve,reject)=>{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(val,key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
 let saveChain=Promise.resolve();
-let cloudClient=null, cloudUser=null, cloudSyncBusy=false, lastCloudUpdatedAt=null;
+let cloudClient=null, cloudUser=null, cloudSyncBusy=false, cloudReady=false, cloudPending=false, lastCloudUpdatedAt=null, cloudLoadBusy=false, sharedEvents=[], isWorkspaceAdmin=false, sharedEditingId=null, sharedReloadTimer=null;
 function cloudStatus(msg){const el=document.querySelector('#cloudStatus');if(el)el.textContent=msg}
 function cloudSnapshot(){const copy=JSON.parse(JSON.stringify(state));copy.audioData='';return copy}
-async function pushCloud(){if(!cloudClient||!cloudUser||cloudSyncBusy)return;cloudSyncBusy=true;try{const payload={user_id:cloudUser.id,state:cloudSnapshot(),updated_at:new Date().toISOString()};const {error}=await cloudClient.from('user_workspace_state').upsert(payload,{onConflict:'user_id'});if(error)throw error;lastCloudUpdatedAt=payload.updated_at;cloudStatus('동기화 완료 · '+new Date().toLocaleTimeString('ko-KR'));$('#cloudAccountBtn').textContent='동기화됨'}catch(e){console.error(e);cloudStatus('클라우드 저장 실패: '+(e.message||'설정과 SQL 정책을 확인하세요.'));$('#cloudAccountBtn').textContent='동기화 오류'}finally{cloudSyncBusy=false}}
+async function pushCloud(){
+ if(!cloudClient||!cloudUser||!cloudReady){return}
+ cloudPending=true;
+ if(cloudSyncBusy)return;
+ cloudSyncBusy=true;
+ try{
+  while(cloudPending && cloudUser && cloudReady){
+   cloudPending=false;
+   const payload={user_id:cloudUser.id,state:cloudSnapshot(),updated_at:new Date().toISOString()};
+   const {error}=await cloudClient.from('user_workspace_state').upsert(payload,{onConflict:'user_id'});
+   if(error)throw error;
+   lastCloudUpdatedAt=payload.updated_at;
+  }
+  cloudStatus('동기화 완료 · '+new Date().toLocaleTimeString('ko-KR'));
+  updateCloudButton();
+ }catch(e){console.error(e);cloudStatus('클라우드 저장 실패: '+(e.message||'Supabase 설정 또는 접근 정책을 확인하세요.'));$('#cloudAccountBtn').textContent='동기화 오류';}
+ finally{cloudSyncBusy=false}
+}
 function persist(){const snapshot=JSON.parse(JSON.stringify(state));saveChain=saveChain.then(()=>dbSet('state',snapshot)).then(()=>pushCloud()).catch(e=>{console.error(e);showToast('저장에 실패했습니다. 데이터 백업을 권장합니다.')});return saveChain}
 function persistSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>persist(),250)}
 function showToast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2400)}
@@ -656,7 +706,19 @@ $('#ttRestore').onclick=()=>{if(!confirm('시간표와 수업 시간을 기본�
 
 function sortedEvents(date){return state.events.filter(e=>e.date===date).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'))}
 function eventNode(e){const row=document.createElement('div');row.className='event';const cb=document.createElement('input');cb.type='checkbox';cb.checked=!!e.done;cb.setAttribute('aria-label','일정 완료');cb.onchange=()=>{e.done=cb.checked;persist();renderToday();renderCalendar();if($('#calendarView').classList.contains('active'))renderSelectedDay()};const main=document.createElement('div');main.className='event-main';const title=document.createElement('div');title.className='event-title'+(e.done?' done':'');title.textContent=e.title;const meta=document.createElement('div');meta.className='event-meta';meta.textContent=[displayEventTime(e.time),e.detail?'상세 내용 있음':'',e.reminder&&e.time?'알림 설정됨':''].filter(Boolean).join(' · ')||'시간 미정';main.append(title,meta);main.onclick=()=>openEventDialog(e.date,e);const edit=document.createElement('button');edit.className='event-edit';edit.textContent='✎';edit.title='일정 상세/수정';edit.onclick=()=>openEventDialog(e.date,e);const dot=document.createElement('span');dot.className='event-progress-dot';dot.title='현재 시간 기준 일정 진행 상태';if(e.done){dot.classList.add('past')}else if(e.time&&e.date===localDate()){const t=new Date(e.date+'T'+e.time+':00').getTime(),now=Date.now();if(now>=t)dot.classList.add('past');else if(now>=t-30*60000)dot.classList.add('active')}row.append(dot,cb,main,edit);return row}
-function renderToday(){const date=localDate(),list=$('#todayList'),events=sortedEvents(date);list.replaceChildren();$('#todayCount').textContent=`${events.filter(e=>e.done).length}/${events.length}개 완료 · ${fmtDate(date)}`;if(!events.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='오늘 등록된 일정이 없습니다. ＋ 버튼으로 추가하세요.';list.append(empty)}else events.forEach(e=>list.append(eventNode(e)))}
+function sharedOn(date){return sharedEvents.filter(e=>e.event_date===date).sort((a,b)=>(a.start_time||'99:99').localeCompare(b.start_time||'99:99'))}
+function sharedItem(e){
+ const row=document.createElement('div');row.className='shared-event';
+ const title=document.createElement('div');title.className='shared-event-title';title.textContent='공통 · '+e.title;
+ const meta=document.createElement('div');meta.className='shared-event-info';
+ meta.textContent=[e.start_time?e.start_time.slice(0,5):'시간 미정',e.location||'',e.details||''].filter(Boolean).join(' · ');
+ row.append(title,meta);
+ if(isWorkspaceAdmin){row.style.cursor='pointer';row.title='관리자: 클릭하여 수정';row.onclick=()=>{switchView('calendarView');editShared(e)}}
+ return row;
+}
+function appendShared(container,date){const entries=sharedOn(date);if(!entries.length)return;const group=document.createElement('div');group.className='shared-day-group';const head=document.createElement('div');head.className='shared-day-group-title';head.textContent='학교 공통 일정 · '+entries.length+'개';group.append(head);entries.forEach(e=>group.append(sharedItem(e)));container.append(group)}
+function renderSharedViews(){renderToday();renderCalendar();renderAdminList()}
+function renderToday(){const date=localDate(),list=$('#todayList'),events=sortedEvents(date);list.replaceChildren();$('#todayCount').textContent=`${events.filter(e=>e.done).length}/${events.length}개 완료 · ${fmtDate(date)}`;if(!events.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='개인 일정이 없습니다. ＋ 버튼으로 추가하세요.';list.append(empty)}else events.forEach(e=>list.append(eventNode(e)));appendShared(list,date)}
 function setupTimePicker(){const h=$('#eventHour'),m=$('#eventMinute');h.min='1';h.max='12';h.step='1';m.min='0';m.max='59';m.step='1';if(!h.value)h.value='9';if(!m.value)m.value='0'}
 function setPeriod(period){$('#periodAM').classList.toggle('active',period==='AM');$('#periodPM').classList.toggle('active',period==='PM');$('#periodAM').setAttribute('aria-pressed',period==='AM');$('#periodPM').setAttribute('aria-pressed',period==='PM');$('#eventTime').dataset.period=period;syncPickedTime()}
 function syncPickedTime(){const period=$('#eventTime').dataset.period||'AM';let hour=Number($('#eventHour').value),minute=Number($('#eventMinute').value);if(!Number.isFinite(hour)||hour<1||hour>12||!Number.isInteger(hour))hour=9;if(!Number.isFinite(minute)||minute<0||minute>59||!Number.isInteger(minute))minute=0;let h=hour%12;if(period==='PM')h+=12;$('#eventTime').value=`${String(h).padStart(2,'0')}:${String(minute).padStart(2,'0')}`}
@@ -671,8 +733,8 @@ $('#eventForm').onsubmit=async ev=>{ev.preventDefault();const title=$('#eventTit
 $('#deleteEventBtn').onclick=async()=>{if(!editingEvent)return;if(confirm('이 일정을 삭제할까요?')){state.events=state.events.filter(e=>e.id!==editingEvent);await persist();$('#eventDialog').close();renderToday();renderCalendar();renderSelectedDay();showToast('일정을 삭제했습니다.')}};
 function checkScheduleReminders(){if(!('Notification'in window)||Notification.permission!=='granted')return;const now=Date.now();let changed=false;for(const e of state.events){if(e.done||e.reminder===false||!e.time||!e.date)continue;const lead=Number(e.reminderLead||0);const eventAt=new Date(`${e.date}T${e.time}:00`).getTime();const at=eventAt-lead*60000;if(!Number.isFinite(at)||now<at||now>eventAt+10*60000)continue;const key=`${e.date}T${e.time}|${lead}`;if(e.notifiedFor===key)continue;e.notifiedFor=key;changed=true;try{const n=new Notification('일정 알림',{body:`${e.title}${e.detail?'\n'+e.detail:''}`,tag:`haru-${e.id}`,requireInteraction:true});n.onclick=()=>{window.focus();selectedDate=e.date;monthCursor=dateObj(e.date);switchView('calendarView');renderCalendar();n.close()}}catch(err){showToast(`일정 알림: ${e.title}`)}}if(changed)persist()}
 function enableScheduleNotifications(){if(!('Notification'in window)){showToast('현재 브라우저는 알림 기능을 지원하지 않습니다.');return}if(Notification.permission==='granted'){showToast('브라우저 알림이 이미 허용되어 있습니다.');return}Notification.requestPermission().then(p=>showToast(p==='granted'?'일정 알림을 허용했습니다.':'알림 권한이 허용되지 않았습니다. 브라우저 설정을 확인하세요.'))}
-function renderCalendar(){const y=monthCursor.getFullYear(),m=monthCursor.getMonth();$('#monthTitle').textContent=`${y}년 ${m+1}월`;const grid=$('#calendarGrid');grid.replaceChildren();const first=new Date(y,m,1),start=new Date(y,m,1-first.getDay());for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const ds=localDate(d),btn=document.createElement('button');btn.className='day-cell'+(d.getMonth()!==m?' muted':'')+(ds===selectedDate?' selected':'')+(ds===localDate()?' today':'');const num=document.createElement('div');num.className='day-num';num.textContent=d.getDate();btn.append(num);if(state.events.some(e=>e.date===ds)){const dot=document.createElement('div');dot.className='dot';btn.append(dot)}btn.onclick=()=>{selectedDate=ds;renderCalendar();renderSelectedDay()};grid.append(btn)}renderSelectedDay()}
-function renderSelectedDay(){if(!$('#selectedDateTitle'))return;$('#selectedDateTitle').textContent=fmtDate(selectedDate);const evs=sortedEvents(selectedDate);$('#selectedDateSub').textContent=`일정 ${evs.length}개 · 완료 ${evs.filter(e=>e.done).length}개`;const box=$('#selectedDayEvents');box.replaceChildren();if(!evs.length){const p=document.createElement('div');p.className='empty';p.textContent='이 날짜에 일정이 없습니다.';box.append(p)}else evs.forEach(e=>box.append(eventNode(e)))}
+function renderCalendar(){const y=monthCursor.getFullYear(),m=monthCursor.getMonth();$('#monthTitle').textContent=`${y}년 ${m+1}월`;const grid=$('#calendarGrid');grid.replaceChildren();const first=new Date(y,m,1),start=new Date(y,m,1-first.getDay());for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const ds=localDate(d),btn=document.createElement('button');btn.className='day-cell'+(d.getMonth()!==m?' muted':'')+(ds===selectedDate?' selected':'')+(ds===localDate()?' today':'');const num=document.createElement('div');num.className='day-num';num.textContent=d.getDate();btn.append(num);if(state.events.some(e=>e.date===ds)||sharedEvents.some(e=>e.event_date===ds)){const dot=document.createElement('div');dot.className='dot';btn.append(dot)}btn.onclick=()=>{selectedDate=ds;renderCalendar();renderSelectedDay()};grid.append(btn)}renderSelectedDay()}
+function renderSelectedDay(){if(!$('#selectedDateTitle'))return;$('#selectedDateTitle').textContent=fmtDate(selectedDate);const evs=sortedEvents(selectedDate);$('#selectedDateSub').textContent=`일정 ${evs.length}개 · 완료 ${evs.filter(e=>e.done).length}개`;const box=$('#selectedDayEvents');box.replaceChildren();if(!evs.length){const p=document.createElement('div');p.className='empty';p.textContent='개인 일정이 없습니다.';box.append(p)}else evs.forEach(e=>box.append(eventNode(e)));appendShared(box,selectedDate)}
 $('#prevMonth').onclick=()=>{monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()-1,1);renderCalendar()};$('#nextMonth').onclick=()=>{monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()+1,1);renderCalendar()};
 function updateTimerUI(){let rem=state.timer.remaining;if(state.timer.running){rem=Math.max(0,Math.ceil((state.timer.deadline-Date.now())/1000));state.timer.remaining=rem;if(rem<=0){state.timer.running=false;state.timer.remaining=0;state.timer.deadline=0;persist();alarm();showToast('타이머가 종료되었습니다.');if(timerInterval){clearInterval(timerInterval);timerInterval=null}}}const m=Math.floor(rem/60),s=rem%60;const clock=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;$('#timerDisplay').textContent=clock;if($('#timerFullDisplay')&&mode!=='stopwatch')$('#timerFullDisplay').textContent=clock;$('#timerMin').value=Math.floor(state.timer.duration/60);$('#timerSec').value=state.timer.duration%60;if($('#timerFullMin'))$('#timerFullMin').value=Math.floor(state.timer.duration/60);if($('#timerFullSec'))$('#timerFullSec').value=state.timer.duration%60;$('#timerStart').textContent=state.timer.running?'실행 중':'시작';if($('#timerFullStart'))$('#timerFullStart').textContent=state.timer.running?'실행 중':'시작';if($('#timerFullCaption')&&mode!=='stopwatch')$('#timerFullCaption').textContent=state.timer.running?'시간이 흐르는 중':(rem===0?'시간이 다 되었습니다':'준비되면 시작하세요');if($('#waveOrb')&&mode!=='stopwatch'){$('#waveOrb').classList.toggle('running',state.timer.running);const progress=state.timer.duration?Math.max(0,Math.min(100,(1-rem/state.timer.duration)*100)):0;$('#waveOrb').style.setProperty('--progress',progress+'%')}}
 function timerFromInputs(){stopAlarmSound();const min=Math.max(0,Math.min(999,Number($('#timerMin').value)||0)),sec=Math.max(0,Math.min(59,Number($('#timerSec').value)||0));state.timer.duration=min*60+sec;state.timer.remaining=state.timer.duration;state.timer.running=false;state.timer.deadline=0;if(timerInterval){clearInterval(timerInterval);timerInterval=null}persist();updateTimerUI()}
@@ -913,25 +975,125 @@ function openCloudDialog(){ $('#cloudOverlay').classList.add('open'); }
 function closeCloudDialog(){ $('#cloudOverlay').classList.remove('open'); }
 async function refreshCloudSession(){
  const url=(window.HARU_SUPABASE_URL||'').trim(),key=(window.HARU_SUPABASE_ANON_KEY||'').trim();
- if(!url||!key||url.includes('YOUR_PROJECT')||key.includes('YOUR_SUPABASE')){cloudStatus('배포 전 설정 필요: supabase-config.js에 프로젝트 URL과 anon/publishable 키를 입력하세요.');return}
- if(!window.supabase){cloudStatus('Supabase 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하세요.');return}
+ if(!url||!key||url.includes('YOUR_PROJECT')||key.includes('YOUR_SUPABASE')){cloudStatus('Supabase 연결 전입니다. 설정 파일에 프로젝트 URL과 공개용 키를 입력하세요.');return}
+ if(!window.supabase){cloudStatus('인증 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하세요.');return}
+ if(cloudClient)return;
  cloudClient=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
- const {data,error}=await cloudClient.auth.getSession();if(error){cloudStatus(error.message);return}
+ cloudClient.auth.onAuthStateChange((event,session)=>{
+  const previous=cloudUser?.id;
+  cloudUser=session?.user||null;
+  updateCloudButton();
+  if(!cloudUser){cloudReady=false;isWorkspaceAdmin=false;sharedEvents=[];$('#sharedAdminPanel').hidden=true;renderSharedViews();return}
+  if(event==='SIGNED_IN'&&previous!==cloudUser.id)setTimeout(()=>loadCloudState(true),0);
+ });
+ const {data,error}=await cloudClient.auth.getSession();
+ if(error){cloudStatus('인증 확인 오류: '+error.message);return}
  cloudUser=data.session?.user||null;updateCloudButton();
- if(cloudUser) cloudStatus('로그인됨: '+cloudUser.email+' · 동기화 준비 완료');else cloudStatus('로그인하지 않았습니다. 이메일과 비밀번호로 로그인하거나 계정을 만드세요.');
- cloudClient.auth.onAuthStateChange((event,session)=>{cloudUser=session?.user||null;updateCloudButton();if(event==='SIGNED_IN')loadCloudState(true);if(event==='SIGNED_OUT')cloudStatus('로그아웃했습니다. 이 기기의 로컬 데이터는 유지됩니다.')});
+ if(cloudUser){await loadCloudState(true)}else cloudStatus('이메일 계정을 만들거나 로그인하세요.');
 }
 function updateCloudButton(){ $('#cloudAccountBtn').textContent=cloudUser?'계정 · '+(cloudUser.email||'로그인됨'):'로그인 / 동기화'; }
-async function loadCloudState(firstLogin=false){if(!cloudClient||!cloudUser)return;try{cloudStatus('클라우드 데이터를 불러오는 중…');const {data,error}=await cloudClient.from('user_workspace_state').select('state,updated_at').eq('user_id',cloudUser.id).maybeSingle();if(error)throw error;if(data?.state){const localAudio=state.audioData||'';state={...state,...data.state,audioData:localAudio,timer:{...state.timer,...data.state.timer}};await dbSet('state',state);lastCloudUpdatedAt=data.updated_at;cloudStatus('클라우드 데이터를 불러왔습니다. 화면을 새로 고칩니다…');setTimeout(()=>location.reload(),350)}else{await pushCloud();cloudStatus('현재 기기의 데이터를 클라우드에 처음 저장했습니다.')}}catch(e){console.error(e);cloudStatus('불러오기 실패: '+(e.message||'테이블과 RLS 설정을 확인하세요.'))}}
-async function manualCloudSync(){if(!cloudClient||!cloudUser){cloudStatus('먼저 Supabase 설정 후 로그인하세요.');return}await loadCloudState(false)}
-$('#cloudAccountBtn').addEventListener('click',()=>{openCloudDialog();refreshCloudSession()});$('#cloudCloseBtn').onclick=closeCloudDialog;
-$('#cloudLoginBtn').onclick=async()=>{if(!cloudClient){await refreshCloudSession();if(!cloudClient)return}const email=$('#cloudEmail').value.trim(),password=$('#cloudPassword').value;if(!email||!password){cloudStatus('이메일과 비밀번호를 입력하세요.');return}cloudStatus('로그인 중…');const {error}=await cloudClient.auth.signInWithPassword({email,password});cloudStatus(error?'로그인 실패: '+error.message:'로그인 성공. 데이터 동기화를 진행합니다…');if(!error)await loadCloudState(true)};
-$('#cloudSignupBtn').onclick=async()=>{if(!cloudClient){await refreshCloudSession();if(!cloudClient)return}const email=$('#cloudEmail').value.trim(),password=$('#cloudPassword').value;if(!email||password.length<8){cloudStatus('이메일과 8자 이상의 비밀번호를 입력하세요.');return}cloudStatus('계정 생성 중…');const {data,error}=await cloudClient.auth.signUp({email,password});if(error)cloudStatus('계정 생성 실패: '+error.message);else if(data.session){cloudUser=data.user;updateCloudButton();await loadCloudState(true)}else cloudStatus('확인 이메일을 보냈습니다. 이메일 인증 후 로그인하세요. (Supabase 설정에 따라 인증 메일이 필요합니다.)')};
+async function loadCloudState(firstLogin=false){
+ if(!cloudClient||!cloudUser||cloudLoadBusy)return;
+ cloudLoadBusy=true;cloudReady=false;
+ try{
+  cloudStatus('클라우드와 공통 일정을 불러오는 중…');
+  const {data,error}=await cloudClient.from('user_workspace_state').select('state,updated_at').eq('user_id',cloudUser.id).maybeSingle();
+  if(error)throw error;
+  if(data?.state){
+   const localAudio=state.audioData||'';
+   state={...state,...data.state,audioData:localAudio,timer:{...state.timer,...data.state.timer,running:false,deadline:0}};
+   await dbSet('state',state);
+   lastCloudUpdatedAt=data.updated_at;
+  }
+  cloudReady=true;
+  if(!data){const importLocal=state.events.length||state.notes.length;const ok=importLocal?confirm('이 계정에 저장된 클라우드 데이터가 없습니다. 현재 브라우저의 기존 일정과 메모를 이 계정으로 가져올까요? (다른 사람의 데이터라면 취소하세요.)'):true;if(!ok){state.events=[];state.notes=[];await dbSet('state',state)}await pushCloud()}
+  await refreshAdminAndShared();
+  cloudStatus((data?'클라우드 일정·메모를 불러왔습니다.':'현재 데이터를 클라우드에 저장했습니다.')+' · '+cloudUser.email);
+  if(data?.state && firstLogin){const reloadKey='hanil-cloud-loaded:'+cloudUser.id;if(!sessionStorage.getItem(reloadKey)){sessionStorage.setItem(reloadKey,'1');setTimeout(()=>location.reload(),400)}}
+  else {renderToday();renderCalendar();renderNotes();}
+ }catch(e){cloudReady=false;cloudStatus('동기화 실패: '+(e.message||e));console.error(e)}
+ finally{cloudLoadBusy=false}
+}
+async function manualCloudSync(){if(!cloudClient||!cloudUser){cloudStatus('먼저 로그인하세요.');return}await loadCloudState(false);if(cloudReady)location.reload()}
+$('#cloudAccountBtn').addEventListener('click',()=>{openCloudDialog();refreshCloudSession()});
+$('#cloudCloseBtn').onclick=closeCloudDialog;
+$('#cloudLoginBtn').onclick=async()=>{
+ if(!cloudClient){await refreshCloudSession();if(!cloudClient)return}
+ const email=$('#cloudEmail').value.trim(),password=$('#cloudPassword').value;
+ if(!email||!password){cloudStatus('이메일과 비밀번호를 입력하세요.');return}
+ cloudStatus('로그인 중…');const {error}=await cloudClient.auth.signInWithPassword({email,password});
+ cloudStatus(error?'로그인 실패: '+error.message:'로그인되었습니다. 동기화합니다…');
+ if(!error && !cloudReady)await loadCloudState(true);
+};
+$('#cloudSignupBtn').onclick=async()=>{
+ if(!cloudClient){await refreshCloudSession();if(!cloudClient)return}
+ const email=$('#cloudEmail').value.trim(),password=$('#cloudPassword').value;
+ if(!email||password.length<8){cloudStatus('이메일과 8자 이상의 비밀번호가 필요합니다.');return}
+ cloudStatus('계정을 생성하는 중…');
+ const {data,error}=await cloudClient.auth.signUp({email,password,emailRedirectTo:location.origin+location.pathname});
+ if(error)cloudStatus('계정 생성 실패: '+error.message);
+ else if(data.session){cloudUser=data.user;updateCloudButton();await loadCloudState(true)}
+ else cloudStatus('이메일 인증 메일을 확인한 다음 로그인하세요.');
+};
 $('#cloudSyncBtn').onclick=manualCloudSync;
-$('#cloudLogoutBtn').onclick=async()=>{if(cloudClient){await cloudClient.auth.signOut();cloudUser=null;updateCloudButton()}};
+$('#cloudLogoutBtn').onclick=async()=>{
+ if(cloudClient){const {error}=await cloudClient.auth.signOut();if(error){cloudStatus(error.message);return}cloudUser=null;cloudReady=false;isWorkspaceAdmin=false;sharedEvents=[];$('#sharedAdminPanel').hidden=true;updateCloudButton();renderSharedViews();cloudStatus('로그아웃되었습니다. 이 브라우저에 보관된 로컬 데이터는 남아 있습니다. 공용 기기에서는 사용하지 마세요.')}
+};
+
+async function refreshAdminAndShared(){
+ if(!cloudClient||!cloudUser)return;
+ const [roleResult,eventsResult]=await Promise.all([
+  cloudClient.rpc('is_workspace_admin'),
+  cloudClient.from('workspace_shared_events').select('id,event_date,start_time,title,details,location,updated_at').order('event_date',{ascending:true}).limit(2000)
+ ]);
+ if(roleResult.error)throw roleResult.error;
+ if(eventsResult.error)throw eventsResult.error;
+ isWorkspaceAdmin=roleResult.data===true;
+ sharedEvents=eventsResult.data||[];
+ $('#sharedAdminPanel').hidden=!isWorkspaceAdmin;
+ renderSharedViews();
+}
+function renderAdminList(){
+ const box=$('#sharedAdminList');if(!box)return;box.replaceChildren();if(!isWorkspaceAdmin)return;
+ if(!sharedEvents.length){box.textContent='등록된 공통 일정이 없습니다.';return}
+ sharedEvents.forEach(e=>{
+  const row=document.createElement('div');row.className='shared-admin-row';
+  const label=document.createElement('span');label.textContent=`${e.event_date} ${e.start_time?.slice(0,5)||''} · ${e.title}`;
+  const edit=document.createElement('button');edit.textContent='수정';edit.onclick=()=>editShared(e);
+  const del=document.createElement('button');del.textContent='삭제';del.className='danger';del.onclick=async()=>{
+   if(!confirm('모든 사용자에게 표시되는 공통 일정을 삭제할까요?'))return;
+   const {error}=await cloudClient.from('workspace_shared_events').delete().eq('id',e.id);
+   if(error)$('#sharedAdminStatus').textContent='삭제 실패: '+error.message;
+   else await refreshAdminAndShared();
+  };row.append(label,edit,del);box.append(row);
+ });
+}
+function clearSharedForm(){sharedEditingId=null;$('#sharedTitle').value='';$('#sharedDate').value=selectedDate;$('#sharedTime').value='';$('#sharedLocation').value='';$('#sharedDetail').value='';$('#sharedSave').textContent='공통 일정 등록';$('#sharedCancel').hidden=true}
+function editShared(e){
+ if(!isWorkspaceAdmin)return;
+ sharedEditingId=e.id;$('#sharedTitle').value=e.title;$('#sharedDate').value=e.event_date;$('#sharedTime').value=e.start_time?.slice(0,5)||'';$('#sharedLocation').value=e.location||'';$('#sharedDetail').value=e.details||'';
+ $('#sharedSave').textContent='공통 일정 수정';$('#sharedCancel').hidden=false;
+ $('#sharedAdminPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('#sharedCancel').onclick=clearSharedForm;
+$('#sharedReload').onclick=()=>refreshAdminAndShared().catch(e=>$('#sharedAdminStatus').textContent=e.message);
+$('#sharedSave').onclick=async()=>{
+ if(!cloudClient||!cloudUser||!isWorkspaceAdmin){showToast('관리자 로그인이 필요합니다.');return}
+ const title=$('#sharedTitle').value.trim(),date=$('#sharedDate').value,time=$('#sharedTime').value;
+ if(!title||!date){$('#sharedAdminStatus').textContent='제목과 날짜는 필수입니다.';return}
+ const payload={title,event_date:date,start_time:time||null,location:$('#sharedLocation').value.trim()||null,details:$('#sharedDetail').value.trim()||null};
+ const btn=$('#sharedSave');btn.disabled=true;
+ try{
+  const result=sharedEditingId?await cloudClient.from('workspace_shared_events').update(payload).eq('id',sharedEditingId):await cloudClient.from('workspace_shared_events').insert({...payload,created_by:cloudUser.id});
+  if(result.error)throw result.error;
+  $('#sharedAdminStatus').textContent='모든 사용자에게 공통 일정이 저장되었습니다.';
+  clearSharedForm();await refreshAdminAndShared();
+ }catch(e){$('#sharedAdminStatus').textContent='저장 실패: '+e.message}
+ finally{btn.disabled=false}
+};
 async function init(){try{await openDB();const saved=await dbGet('state');if(saved)state={...state,...saved,timer:{...state.timer,...saved.timer}}}catch(e){console.error(e);showToast('저장소를 열 수 없습니다. 시크릿 모드가 아닌지 확인하세요.')}
 renderCalcHistory();
-if(state.weeklyTimetable){for(const day of Object.values(state.weeklyTimetable)){if(!Array.isArray(day))continue;for(const lesson of day){if(!Array.isArray(lesson))continue;const corrections={'김동환T':'김동화T','윤은기T':'윤인욱T','김성하T':'김성아T','박만호T':'박민춘T'};if(corrections[lesson[1]])lesson[1]=corrections[lesson[1]]}}if(state.weeklyTimetable[5]?.[5]?.[0]==='D')state.weeklyTimetable[5][5][0]='선택D';}migratePostedTimetable();migratePeriodTimes();applyTheme();renderPresets();$('#byteText').value=typeof state.byteDraft==='string'?state.byteDraft:'';updateByteCounts();renderByteRecords();renderHeader();renderTimetable();setInterval(()=>{renderHeader();renderTimetable();renderToday()},60000);refreshCloudSession().catch(e=>console.error(e));renderToday();renderCalendar();updateAudioStatus();$('#headphoneOnly').checked=state.headphoneOnly!==false;$('#homeHeadphone').checked=state.headphoneOnly!==false;$('#angleMode').value=state.angleMode||'DEG';calcExpr=state.calc||'0';$('#calcScreen').value=calcExpr;try{recordingDirectoryHandle=await dbGet('recordingDirectory');if(recordingDirectoryHandle)$('#recordFolderStatus').textContent='저장 폴더 설정됨'}catch{}setupTimePicker();setPickedTime('');updateTimerUI();checkScheduleReminders();if(notificationInterval)clearInterval(notificationInterval);notificationInterval=setInterval(checkScheduleReminders,15000);if(state.timer.running){if(state.timer.deadline<=Date.now()){state.timer.remaining=0;state.timer.running=false;state.timer.deadline=0;persist()}else timerInterval=setInterval(updateTimerUI,200)}}
+if(state.weeklyTimetable){for(const day of Object.values(state.weeklyTimetable)){if(!Array.isArray(day))continue;for(const lesson of day){if(!Array.isArray(lesson))continue;const corrections={'김동환T':'김동화T','윤은기T':'윤인욱T','김성하T':'김성아T','박만호T':'박민춘T'};if(corrections[lesson[1]])lesson[1]=corrections[lesson[1]]}}if(state.weeklyTimetable[5]?.[5]?.[0]==='D')state.weeklyTimetable[5][5][0]='선택D';}migratePostedTimetable();migratePeriodTimes();applyTheme();renderPresets();$('#byteText').value=typeof state.byteDraft==='string'?state.byteDraft:'';updateByteCounts();renderByteRecords();renderHeader();renderTimetable();setInterval(()=>{renderHeader();renderTimetable();renderToday()},60000);refreshCloudSession().catch(e=>console.error(e));setInterval(()=>{if(cloudClient&&cloudUser)refreshAdminAndShared().catch(e=>console.warn('공통 일정 갱신 실패:',e))},45000);clearSharedForm();renderToday();renderCalendar();updateAudioStatus();$('#headphoneOnly').checked=state.headphoneOnly!==false;$('#homeHeadphone').checked=state.headphoneOnly!==false;$('#angleMode').value=state.angleMode||'DEG';calcExpr=state.calc||'0';$('#calcScreen').value=calcExpr;try{recordingDirectoryHandle=await dbGet('recordingDirectory');if(recordingDirectoryHandle)$('#recordFolderStatus').textContent='저장 폴더 설정됨'}catch{}setupTimePicker();setPickedTime('');updateTimerUI();checkScheduleReminders();if(notificationInterval)clearInterval(notificationInterval);notificationInterval=setInterval(checkScheduleReminders,15000);if(state.timer.running){if(state.timer.deadline<=Date.now()){state.timer.remaining=0;state.timer.running=false;state.timer.deadline=0;persist()}else timerInterval=setInterval(updateTimerUI,200)}}
 window.addEventListener('beforeunload',()=>{stopMeter();if(recordStream)recordStream.getTracks().forEach(t=>t.stop());if(state.timer.running)state.timer.remaining=Math.max(0,Math.ceil((state.timer.deadline-Date.now())/1000));try{if(db){const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(state,'state')}}catch{}});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderHeader();updateTimerUI();checkScheduleReminders()}});
 init();
