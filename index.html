@@ -475,6 +475,7 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
    <div class="share-upload" id="shareDrop" role="button" tabindex="0" aria-label="파일 선택 또는 파일을 끌어놓아 업로드"><strong>📤 파일을 클릭하거나 여기로 끌어 놓으세요</strong><small id="shareFolderName">전체 자료에 파일 업로드</small><small>파일 한 개당 최대 20MB · 공유 파일은 로그인한 모든 사용자가 열람할 수 있습니다.</small></div>
    <div class="share-toolbar"><strong>공유 파일</strong><span class="tool-note" id="shareCount"></span></div>
    <div id="shareFiles" class="share-files"></div>
+   <p id="shareInstructions" class="tool-note"></p>
   </div>
   <p id="shareStatus" class="share-status" role="status"></p>
  </div>
@@ -1162,32 +1163,65 @@ const shareEl=id=>document.getElementById(id);
 const shareStatus=message=>{shareEl('shareStatus').textContent=message};
 const shareSize=n=>n>=1048576?(n/1048576).toFixed(1)+' MB':n>=1024?Math.ceil(n/1024)+' KB':n+' B';
 const shareIcon=name=>/\.(pdf)$/i.test(name)?'📕':/\.(png|jpe?g|webp|gif)$/i.test(name)?'🖼️':/\.(zip|7z|rar)$/i.test(name)?'🗜️':/\.(mp4|mov)$/i.test(name)?'🎞️':'📄';
+const shareCanEdit=x=>!!cloudUser&&(isWorkspaceAdmin||x.owner_id===cloudUser.id);
+const shareOrder=(a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0)||a.created_at.localeCompare(b.created_at);
 function shareButton(text,fn,klass=''){
  const b=document.createElement('button');b.type='button';b.textContent=text;if(klass)b.className=klass;b.onclick=fn;return b;
 }
 function shareCurrentFolderName(){return shareFolders.find(f=>f.id===shareFolderId)?.name||'전체 자료'}
+function shareSetDrag(row,kind,id){
+ row.draggable=true;row.classList.add('share-draggable');
+ row.ondragstart=e=>{
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('application/x-hanil-share',JSON.stringify({kind,id}));
+  e.dataTransfer.setData('text/plain','Hanil Workspace 자료 이동');
+ };
+ row.ondragend=()=>document.querySelectorAll('.share-drag-target').forEach(x=>x.classList.remove('share-drag-target'));
+}
+function shareDropTarget(el,action){
+ el.addEventListener('dragover',e=>{
+  const internal=Array.from(e.dataTransfer?.types||[]).includes('application/x-hanil-share');
+  const external=Array.from(e.dataTransfer?.types||[]).includes('Files');
+  if(internal||external){e.preventDefault();e.dataTransfer.dropEffect='move';el.classList.add('share-drag-target')}
+ });
+ el.addEventListener('dragleave',e=>{if(!el.contains(e.relatedTarget))el.classList.remove('share-drag-target')});
+ el.addEventListener('drop',e=>{
+  const payload=e.dataTransfer.getData('application/x-hanil-share');const external=e.dataTransfer.files;
+  if(!payload&&!external?.length)return;
+  e.preventDefault();e.stopPropagation();el.classList.remove('share-drag-target');
+  if(payload){try{action(JSON.parse(payload),null)}catch(err){shareStatus('드래그 항목을 확인할 수 없습니다.')}}else action(null,external);
+ });
+}
 function shareRender(){
  const inSession=!!cloudUser&&!!cloudClient;
- shareEl('shareLogin').hidden=inSession;
- shareEl('shareWorkspace').hidden=!inSession;
+ shareEl('shareLogin').hidden=inSession;shareEl('shareWorkspace').hidden=!inSession;
  if(!inSession)return;
- const root=shareEl('shareRoot'),name=shareEl('shareFolderName');
- root.replaceChildren(shareButton('자료공유',()=>{shareFolderId=null;shareQuery='';shareEl('shareSearch').value='';shareRender()}));
+ const root=shareEl('shareRoot'),label=shareEl('shareFolderName');
+ root.replaceChildren();
+ const home=shareButton('자료공유',()=>{shareFolderId=null;shareQuery='';shareEl('shareSearch').value='';shareRender()});
+ home.className='share-home';root.append(home);
  if(shareFolderId)root.append(document.createTextNode(' / '+shareCurrentFolderName()));
- name.textContent=shareFolderId?'현재 폴더에 파일 업로드':'전체 자료에 파일 업로드';
+ label.textContent=shareFolderId?'현재 폴더에 파일 업로드':'전체 자료에 파일 업로드';
  shareEl('shareNewFolder').hidden=!!shareFolderId||!!shareQuery;
  const foldersArea=shareEl('shareFolders'),filesArea=shareEl('shareFiles');
  foldersArea.replaceChildren();filesArea.replaceChildren();
+ const folderList=shareFolders.slice().sort(shareOrder);
  if(!shareFolderId&&!shareQuery){
-  for(const folder of shareFolders){
+  for(const folder of folderList){
    const row=document.createElement('div');row.className='share-folder';
    const open=shareButton('',()=>{shareFolderId=folder.id;shareRender()});open.className='share-folder-open';
    const icon=document.createElement('span');icon.textContent='📁';
-   const title=document.createElement('span');title.className='share-folder-name';title.textContent=folder.name;
-   open.append(icon,title);row.append(open);
-   if(folder.owner_id===cloudUser.id){
+   const title=document.createElement('span');title.className='share-folder-name';title.textContent=folder.name;open.append(icon,title);row.append(open);
+   if(shareCanEdit(folder)){
+    row.append(shareButton('이름 변경',()=>shareRename(folder,'folder'),'share-quiet'));
     row.append(shareButton('삭제',()=>shareDeleteFolder(folder),'share-folder-delete'));
    }
+   if(isWorkspaceAdmin)shareSetDrag(row,'folder',folder.id);
+   shareDropTarget(row,(payload,external)=>{
+    if(external?.length){shareUpload(external,folder.id);return}
+    if(payload?.kind==='file')shareMoveFile(payload.id,folder.id);
+    else if(payload?.kind==='folder'&&isWorkspaceAdmin)shareReorder('folder',payload.id,folder.id);
+   });
    foldersArea.append(row);
   }
  }
@@ -1197,20 +1231,30 @@ function shareRender(){
    return (file.filename+' '+folderName).toLowerCase().includes(shareQuery);
   }
   return file.folder_id===shareFolderId;
- });
+ }).sort(shareOrder);
  shareEl('shareCount').textContent=shareQuery?('검색 결과 '+matches.length+'개'):('파일 '+matches.length+'개 · 폴더 '+(shareFolderId?0:shareFolders.length)+'개');
  for(const file of matches){
   const row=document.createElement('div');row.className='share-file-row';
   const main=document.createElement('div');main.className='share-file-main';
+  const handle=document.createElement('span');handle.className='share-file-handle';handle.title=shareCanEdit(file)?'드래그하여 폴더로 이동'+(isWorkspaceAdmin?'하거나 순서 변경':''):'업로더만 이동 가능';handle.textContent=shareCanEdit(file)?'⠿':'';
   const icon=document.createElement('span');icon.className='share-file-icon';icon.textContent=shareIcon(file.filename);
-  const textBox=document.createElement('div');textBox.className='share-file-text';
+  const txt=document.createElement('div');txt.className='share-file-text';
   const title=document.createElement('strong');title.textContent=file.filename;title.title=file.filename;
   const meta=document.createElement('small');
   meta.textContent=[shareSize(file.size_bytes),file.owner_id===cloudUser.id?'내가 올림':'공유됨',new Date(file.created_at).toLocaleDateString('ko-KR'),shareQuery?(shareFolders.find(x=>x.id===file.folder_id)?.name||'전체 자료'):null].filter(Boolean).join(' · ');
-  textBox.append(title,meta);main.append(icon,textBox);
+  txt.append(title,meta);main.append(handle,icon,txt);
   const actions=document.createElement('div');actions.className='share-file-buttons';
   actions.append(shareButton('다운로드',()=>shareDownload(file)));
-  if(file.owner_id===cloudUser.id)actions.append(shareButton('삭제',()=>shareDeleteFile(file),'danger'));
+  if(shareCanEdit(file)){
+   actions.append(shareButton('이름 변경',()=>shareRename(file,'file')));
+   actions.append(shareButton('이동',()=>shareMovePrompt(file)));
+   actions.append(shareButton('교체',()=>shareReplaceFile(file)));
+   actions.append(shareButton('삭제',()=>shareDeleteFile(file),'danger'));
+   shareSetDrag(row,'file',file.id);
+  }
+  if(isWorkspaceAdmin&&!shareQuery)shareDropTarget(row,(payload,external)=>{
+   if(payload?.kind==='file')shareReorder('file',payload.id,file.id);
+  });
   row.append(main,actions);filesArea.append(row);
  }
  if(!matches.length){
@@ -1218,20 +1262,22 @@ function shareRender(){
   empty.textContent=shareQuery?'검색 결과가 없습니다.':'파일이 없습니다. 자료를 업로드해 보세요.';
   filesArea.append(empty);
  }
+ shareEl('shareInstructions').textContent=isWorkspaceAdmin?'관리자: 모든 파일·폴더를 수정·삭제할 수 있습니다. 드래그로 파일을 폴더에 넣거나 항목의 순서를 변경하세요.':'내 파일은 드래그로 폴더에 이동할 수 있습니다. 순서 변경과 타인 파일 관리는 관리자만 가능합니다.';
 }
 async function shareLoad(){
  if(!shareEl('shareView'))return;
  if(!cloudUser||!cloudClient){shareFolders=[];shareFiles=[];shareRender();return}
  try{
   shareStatus('자료 목록을 불러오는 중…');
-  const [a,b]=await Promise.all([
-   cloudClient.from('hw_share_folders').select('id,name,owner_id,created_at').order('created_at',{ascending:true}).limit(1000),
-   cloudClient.from('hw_share_files').select('id,filename,folder_id,owner_id,storage_path,size_bytes,mime_type,created_at').order('created_at',{ascending:false}).limit(3000)
+  const [role,a,b]=await Promise.all([
+   cloudClient.rpc('is_workspace_admin'),
+   cloudClient.from('hw_share_folders').select('id,name,owner_id,created_at,sort_order').order('sort_order',{ascending:true}).limit(1000),
+   cloudClient.from('hw_share_files').select('id,filename,folder_id,owner_id,storage_path,size_bytes,mime_type,created_at,sort_order').order('sort_order',{ascending:true}).limit(3000)
   ]);
-  if(a.error)throw a.error;if(b.error)throw b.error;
-  shareFolders=a.data||[];shareFiles=b.data||[];
+  if(role.error)throw role.error;if(a.error)throw a.error;if(b.error)throw b.error;
+  isWorkspaceAdmin=role.data===true;shareFolders=a.data||[];shareFiles=b.data||[];
   if(shareFolderId&&!shareFolders.some(x=>x.id===shareFolderId))shareFolderId=null;
-  shareRender();shareStatus('모든 로그인 사용자에게 공유되는 자료입니다. 파일 삭제는 업로더만 가능합니다.');
+  shareRender();shareStatus('모든 로그인 사용자에게 공유되는 자료입니다.');
  }catch(e){shareStatus('자료 불러오기 실패: '+e.message);shareRender()}
 }
 async function shareCreateFolder(){
@@ -1241,14 +1287,15 @@ async function shareCreateFolder(){
  if(name.length>80){shareStatus('폴더 이름은 80자 이내로 입력하세요.');return}
  shareBusy=true;
  try{
-  const {error}=await cloudClient.from('hw_share_folders').insert({name,owner_id:cloudUser.id});
+  const order=Math.max(0,...shareFolders.map(f=>Number(f.sort_order)||0))+1000;
+  const {error}=await cloudClient.from('hw_share_folders').insert({name,owner_id:cloudUser.id,sort_order:order});
   if(error)throw error;input.value='';await shareLoad();shareStatus('공유 폴더를 만들었습니다.');
  }catch(e){shareStatus('폴더 생성 실패: '+e.message)}
  finally{shareBusy=false}
 }
 async function shareDeleteFolder(folder){
- if(shareBusy||folder.owner_id!==cloudUser.id)return;
- if(shareFiles.some(x=>x.folder_id===folder.id)){shareStatus('폴더 안의 파일을 먼저 삭제하거나 별도 폴더에 다시 업로드하세요.');return}
+ if(shareBusy||!shareCanEdit(folder))return;
+ if(shareFiles.some(x=>x.folder_id===folder.id)){shareStatus('폴더 안의 파일을 먼저 이동하거나 삭제하세요.');return}
  if(!confirm('빈 폴더 "'+folder.name+'"을 삭제할까요?'))return;
  shareBusy=true;
  try{
@@ -1257,33 +1304,29 @@ async function shareDeleteFolder(folder){
  }catch(e){shareStatus('폴더 삭제 실패: '+e.message)}
  finally{shareBusy=false}
 }
-async function shareUpload(files){
+async function shareUpload(files,targetFolderId=shareFolderId){
  if(shareBusy||!cloudUser||!cloudClient){shareStatus('로그인 후 업로드할 수 있습니다.');return}
- const chosen=Array.from(files||[]);
- if(!chosen.length)return;
+ const chosen=Array.from(files||[]);if(!chosen.length)return;
  shareBusy=true;shareEl('sharePick').disabled=true;
  let done=0,failed=0,failures=[];
  try{
   for(const file of chosen){
-   if(file.size>shareLimit){failed++;failures.push(file.name+': 파일 크기가 20MB를 초과합니다.');continue}
-   if(!file.name.trim()||file.name.length>240){failed++;failures.push(file.name+': 파일 이름은 240자 이내여야 합니다.');continue}
-   // Storage keys must be safe ASCII; preserve the original Korean filename in metadata.
-   const extension=(file.name.match(/\.([A-Za-z0-9]{1,12})$/)?.[1]||'bin').toLowerCase();
-   const uuid=crypto.randomUUID(),path=cloudUser.id+'/'+uuid+'/'+uuid+'.'+extension;
-   shareStatus('업로드 중 ('+(done+1)+'/'+chosen.length+') · '+file.name);
-   const uploaded=await cloudClient.storage.from(shareBucket).upload(path,file,{upsert:false,contentType:file.type||'application/octet-stream'});
-   if(uploaded.error){failed++;failures.push(file.name+': '+uploaded.error.message);continue}
+   if(file.size>shareLimit){failed++;failures.push(file.name+': 20MB를 초과합니다.');continue}
+   if(!file.name.trim()||file.name.length>240){failed++;failures.push(file.name+': 이름이 너무 깁니다.');continue}
+   const ext=(file.name.match(/\.([A-Za-z0-9]{1,12})$/)?.[1]||'bin').toLowerCase();
+   const uuid=crypto.randomUUID(),path=cloudUser.id+'/'+uuid+'/'+uuid+'.'+ext;
+   shareStatus('업로드 중 ('+(done+failed+1)+'/'+chosen.length+') · '+file.name);
+   const {error:storageError}=await cloudClient.storage.from(shareBucket).upload(path,file,{upsert:false,contentType:file.type||'application/octet-stream'});
+   if(storageError){failed++;failures.push(file.name+': '+storageError.message);continue}
+   const order=Math.max(0,...shareFiles.filter(f=>f.folder_id===targetFolderId).map(f=>Number(f.sort_order)||0))+1000+done;
    const {error}=await cloudClient.from('hw_share_files').insert({
-    filename:file.name,folder_id:shareFolderId,owner_id:cloudUser.id,storage_path:path,size_bytes:file.size,mime_type:file.type||null
+    filename:file.name,folder_id:targetFolderId,owner_id:cloudUser.id,storage_path:path,
+    size_bytes:file.size,mime_type:file.type||null,sort_order:order
    });
-   if(error){
-    await cloudClient.storage.from(shareBucket).remove([path]);
-    failed++;failures.push(file.name+': '+error.message);continue;
-   }
+   if(error){await cloudClient.storage.from(shareBucket).remove([path]);failed++;failures.push(file.name+': '+error.message);continue}
    done++;
   }
-  await shareLoad();
-  shareStatus('업로드 완료 '+done+'개 / 실패 '+failed+'개'+(failures.length?' · '+failures.slice(0,2).join(' / '):''));
+  await shareLoad();shareStatus('업로드 완료 '+done+'개 / 실패 '+failed+'개'+(failures.length?' · '+failures.slice(0,2).join(' / '):''));
  }catch(e){shareStatus('업로드 중 오류: '+e.message)}
  finally{shareBusy=false;shareEl('sharePick').disabled=false;shareEl('sharePick').value=''}
 }
@@ -1293,15 +1336,15 @@ async function shareDownload(file){
   shareStatus('다운로드 준비 중… '+file.filename);
   const {data,error}=await cloudClient.storage.from(shareBucket).download(file.storage_path);
   if(error)throw error;
-  const blobUrl=URL.createObjectURL(data),a=document.createElement('a');
-  a.href=blobUrl;a.download=file.filename;document.body.append(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(blobUrl),30000);
+  const url=URL.createObjectURL(data),a=document.createElement('a');
+  a.href=url;a.download=file.filename;document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
   shareStatus('다운로드를 시작했습니다: '+file.filename);
  }catch(e){shareStatus('다운로드 실패: '+e.message)}
 }
 async function shareDeleteFile(file){
- if(shareBusy||file.owner_id!==cloudUser?.id)return;
- if(!confirm('내가 올린 파일 "'+file.filename+'"을 모든 사용자의 자료공유에서 삭제할까요?'))return;
+ if(shareBusy||!shareCanEdit(file))return;
+ if(!confirm('공유 파일 "'+file.filename+'"을 모든 사용자의 자료공유에서 삭제할까요?'))return;
  shareBusy=true;
  try{
   const {error:storageError}=await cloudClient.storage.from(shareBucket).remove([file.storage_path]);
@@ -1312,6 +1355,89 @@ async function shareDeleteFile(file){
  }catch(e){shareStatus('삭제 실패: '+e.message)}
  finally{shareBusy=false}
 }
+async function shareRename(item,kind){
+ if(shareBusy||!shareCanEdit(item))return;
+ const current=kind==='file'?item.filename:item.name;
+ const next=prompt(kind==='file'?'파일 이름 변경':'폴더 이름 변경',current);
+ if(next===null||next.trim()===current)return;
+ const name=next.trim(),max=kind==='file'?240:80;
+ if(!name||name.length>max){shareStatus('이름은 1~'+max+'자 사이여야 합니다.');return}
+ shareBusy=true;
+ try{
+  const table=kind==='file'?'hw_share_files':'hw_share_folders';
+  const field=kind==='file'?'filename':'name';
+  const {error}=await cloudClient.from(table).update({[field]:name}).eq('id',item.id);
+  if(error)throw error;await shareLoad();shareStatus('이름을 변경했습니다.');
+ }catch(e){shareStatus('이름 변경 실패: '+e.message)}
+ finally{shareBusy=false}
+}
+async function shareMovePrompt(file){
+ if(!shareCanEdit(file))return;
+ const available=['0. 전체 자료',...shareFolders.slice().sort(shareOrder).map((f,i)=>(i+1)+'. '+f.name)];
+ const input=prompt('이동할 폴더 번호를 입력하세요.\n'+available.join('\n'),'0');
+ if(input===null)return;
+ if(!/^\d+$/.test(input.trim())){shareStatus('폴더 번호를 확인하세요.');return}
+ const idx=Number(input),folders=shareFolders.slice().sort(shareOrder);
+ if(idx<0||idx>folders.length){shareStatus('올바른 폴더 번호를 입력하세요.');return}
+ await shareMoveFile(file.id,idx===0?null:folders[idx-1].id);
+}
+async function shareMoveFile(fileId,targetId){
+ const file=shareFiles.find(x=>x.id===fileId);
+ if(!file||!shareCanEdit(file)||shareBusy)return;
+ if(targetId!==null&&!shareFolders.some(f=>f.id===targetId))return;
+ if(file.folder_id===targetId){shareStatus('이미 해당 폴더에 있습니다.');return}
+ shareBusy=true;
+ try{
+  const sort_order=Math.max(0,...shareFiles.filter(x=>x.folder_id===targetId).map(x=>Number(x.sort_order)||0))+1000;
+  const {error}=await cloudClient.from('hw_share_files').update({folder_id:targetId,sort_order}).eq('id',file.id);
+  if(error)throw error;
+  await shareLoad();shareStatus('파일을 '+(targetId?shareFolders.find(f=>f.id===targetId)?.name:'전체 자료')+'로 이동했습니다.');
+ }catch(e){shareStatus('파일 이동 실패: '+e.message)}
+ finally{shareBusy=false}
+}
+async function shareReorder(kind,sourceId,targetId){
+ if(!isWorkspaceAdmin||shareBusy||sourceId===targetId||shareQuery)return;
+ const source=kind==='folder'?shareFolders:shareFiles;
+ const dragged=source.find(x=>x.id===sourceId),target=source.find(x=>x.id===targetId);
+ if(!dragged||!target)return;
+ if(kind==='file'&&dragged.folder_id!==target.folder_id){await shareMoveFile(sourceId,target.folder_id);return}
+ const items=source.filter(x=>kind==='folder'||x.folder_id===target.folder_id).slice().sort(shareOrder);
+ const from=items.findIndex(x=>x.id===sourceId),to=items.findIndex(x=>x.id===targetId);
+ if(from<0||to<0)return;
+ items.splice(from,1);items.splice(to,0,dragged);
+ shareBusy=true;
+ try{
+  const table=kind==='folder'?'hw_share_folders':'hw_share_files';
+  for(let i=0;i<items.length;i++){
+   const order=(i+1)*1000;if(Number(items[i].sort_order)===order)continue;
+   const {error}=await cloudClient.from(table).update({sort_order:order}).eq('id',items[i].id);
+   if(error)throw error;
+  }
+  await shareLoad();shareStatus('공유 목록 순서를 저장했습니다.');
+ }catch(e){shareStatus('순서 저장 실패: '+e.message);await shareLoad()}
+ finally{shareBusy=false}
+}
+async function shareReplaceFile(file){
+ if(!shareCanEdit(file)||shareBusy)return;
+ const chooser=document.createElement('input');chooser.type='file';
+ chooser.onchange=async()=>{
+  const replacement=chooser.files?.[0];if(!replacement)return;
+  if(replacement.size>shareLimit){shareStatus('파일 크기가 20MB를 초과합니다.');return}
+  if(!confirm('기존 파일 내용을 교체하시겠습니까? 모든 사용자에게 즉시 적용되며 원본은 복원할 수 없습니다.'))return;
+  shareBusy=true;
+  try{
+   shareStatus('파일 내용을 교체하는 중…');
+   const {error}=await cloudClient.storage.from(shareBucket).update(file.storage_path,replacement,{upsert:true,contentType:replacement.type||'application/octet-stream',cacheControl:'0'});
+   if(error)throw error;
+   const metadata={size_bytes:replacement.size,mime_type:replacement.type||null};
+   const {error:dbError}=await cloudClient.from('hw_share_files').update(metadata).eq('id',file.id);
+   if(dbError)throw dbError;
+   await shareLoad();shareStatus('파일 내용을 교체했습니다. 기존 파일 이름은 유지됩니다.');
+  }catch(e){shareStatus('파일 교체 실패: '+e.message)}
+  finally{shareBusy=false}
+ };
+ chooser.click();
+}
 shareEl('shareRefresh').onclick=shareLoad;
 shareEl('shareFolderButton').onclick=shareCreateFolder;
 shareEl('shareFolderInput').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();shareCreateFolder()}};
@@ -1320,9 +1446,19 @@ shareEl('sharePick').onchange=e=>shareUpload(e.target.files);
 const shareDrop=shareEl('shareDrop');
 shareDrop.onclick=()=>shareEl('sharePick').click();
 shareDrop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();shareEl('sharePick').click()}};
-shareDrop.ondragover=e=>{e.preventDefault();shareDrop.classList.add('dragover')};
+shareDrop.ondragover=e=>{
+ if(!Array.from(e.dataTransfer.types||[]).includes('Files'))return;
+ e.preventDefault();shareDrop.classList.add('dragover');
+};
 shareDrop.ondragleave=()=>shareDrop.classList.remove('dragover');
-shareDrop.ondrop=e=>{e.preventDefault();shareDrop.classList.remove('dragover');shareUpload(e.dataTransfer?.files)};
+shareDrop.ondrop=e=>{
+ e.preventDefault();shareDrop.classList.remove('dragover');
+ if(e.dataTransfer.files?.length)shareUpload(e.dataTransfer.files);
+};
+shareDropTarget(shareEl('shareRoot'),(payload,files)=>{
+ if(payload?.kind==='file')shareMoveFile(payload.id,null);
+ else if(files?.length)shareUpload(files,null);
+});
 shareRender();
 
 shareEl('shareLoginButton').onclick=()=>{openCloudDialog();refreshCloudSession()};
