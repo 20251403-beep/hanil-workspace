@@ -474,6 +474,12 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
    <input type="file" multiple id="sharePick" hidden>
    <div class="share-upload" id="shareDrop" role="button" tabindex="0" aria-label="파일 선택 또는 파일을 끌어놓아 업로드"><strong>📤 파일을 클릭하거나 여기로 끌어 놓으세요</strong><small id="shareFolderName">전체 자료에 파일 업로드</small><small>파일 한 개당 최대 20MB · 공유 파일은 로그인한 모든 사용자가 열람할 수 있습니다.</small></div>
    <div class="share-toolbar"><strong>공유 파일</strong><div class="share-tools"><label class="tool-note" for="shareSort">정렬</label><select id="shareSort" aria-label="공유 파일 정렬"><option value="random">랜덤</option><option value="newest">최신순</option><option value="oldest">오래된순</option><option value="manual">직접 지정순</option></select><span class="tool-note" id="shareCount"></span></div></div>
+   <div class="share-multiselect" id="shareMultiselect">
+    <span class="share-select-summary" id="shareSelectedCount" aria-live="polite">0개 선택</span>
+    <button type="button" class="ghost" id="shareSelectAll">현재 목록 전체 선택</button>
+    <button type="button" class="ghost" id="shareClearSelection">선택 해제</button>
+    <button type="button" class="primary" id="shareDownloadSelected" disabled>선택 파일 ZIP 다운로드</button>
+   </div>
    <div id="shareFiles" class="share-files"></div>
    <p id="shareInstructions" class="tool-note"></p>
   </div>
@@ -559,6 +565,7 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
   <div class="cloud-status" id="cloudStatus">클라우드 설정을 확인하는 중…</div><div class="cloud-sync-note">음악/녹음 파일 자체는 동기화되지 않습니다. 일정·메모·설정은 기기 간 동기화되며 여러 기기에서 동시에 수정하면 마지막 저장이 우선할 수 있습니다.</div>
 </div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="./supabase-config.js"></script>
 <dialog id="eventDialog" style="border:1px solid var(--line);border-radius:20px;background:var(--panel);color:var(--text);width:min(560px,calc(100% - 24px));padding:24px;box-shadow:0 20px 80px #0003"><form id="eventForm"><div class="panel-head"><h2 id="eventDialogTitle">일정 추가</h2><button type="button" class="ghost" id="closeEventDialog">✕</button></div><div class="form-grid"><div class="field full" id="eventScopeField" hidden><label for="eventScope">일정 공개 범위</label><select id="eventScope"><option value="private">개인 일정 · 나만 보기</option><option value="shared">전체 일정 · 로그인한 모든 사용자</option></select><div class="tool-note" id="eventScopeHelp">전체 일정은 관리자만 등록할 수 있으며 모든 로그인 사용자에게 표시됩니다.</div></div><div class="field full"><label for="eventTitle">일정 제목 *</label><input id="eventTitle" required maxlength="200" placeholder="예: 수학 과제 제출"></div><div class="field"><label for="eventDate">날짜</label><input id="eventDate" type="date" required></div><div class="field full"><label>시간 선택 (선택)</label><div class="time-picker"><div class="period-switch"><button type="button" id="periodAM" class="active">오전</button><button type="button" id="periodPM">오후</button><button type="button" id="clearEventTime" class="ghost">시간 미정</button></div><div class="time-selects"><label class="time-number-field">시 <input id="eventHour" type="number" min="1" max="12" step="1" value="9" inputmode="numeric" aria-label="시간"></label><label class="time-number-field">분 <input id="eventMinute" type="number" min="0" max="59" step="1" value="0" inputmode="numeric" aria-label="분"></label></div><input id="eventTime" type="hidden" value=""></div><div class="reminder-row" style="margin-top:10px"><input id="eventReminder" type="checkbox" checked><label for="eventReminder" style="margin:0;color:var(--text);font-size:13px">일정 알림 받기</label><select id="reminderLead" aria-label="알림 시점"><option value="0">정시 알림</option><option value="5" selected>5분 전</option><option value="10">10분 전</option><option value="15">15분 전</option><option value="30">30분 전</option><option value="60">1시간 전</option></select></div><div class="reminder-note">브라우저 알림 권한이 필요합니다. 일정 알림은 이 HTML 페이지가 열려 있는 동안 작동하며, 브라우저를 완전히 종료하면 알림이 보장되지 않습니다.</div></div><div class="field full"><label for="eventDetail">상세 내용</label><textarea id="eventDetail" placeholder="장소, 준비물, 할 일 등을 적으세요."></textarea></div></div><div class="form-actions"><button type="button" class="danger hidden" id="deleteEventBtn">삭제</button><button type="submit" class="primary">저장</button></div></form></dialog>
 <script>
@@ -1158,6 +1165,29 @@ $('#sharedSave').onclick=async()=>{
 
 /* Shared resource library - authenticated Supabase Storage */
 let shareFolderId=null,shareFolders=[],shareFiles=[],shareBusy=false,shareQuery='';
+let shareSelectedIds=new Set(),shareLastSelectedId=null,shareVisibleIds=[],shareSelectionUserId=null,shareDownloading=false;
+function shareUpdateSelectionUI(){
+ const valid=shareSelectedIds.size;
+ shareEl('shareSelectedCount').textContent=valid+'개 선택';
+ shareEl('shareDownloadSelected').disabled=!valid||shareDownloading;
+ shareEl('shareSelectAll').disabled=!shareVisibleIds.length||shareDownloading;
+ shareEl('shareClearSelection').disabled=!valid||shareDownloading;
+ shareEl('shareDownloadSelected').textContent=shareDownloading?'다운로드 준비 중…':'선택 파일 ZIP 다운로드';
+}
+function shareSelectFile(id,shift=false,toggle=false){
+ const pos=shareVisibleIds.indexOf(id);if(pos<0)return;
+ if(shift&&shareLastSelectedId&&shareVisibleIds.includes(shareLastSelectedId)){
+  const anchor=shareVisibleIds.indexOf(shareLastSelectedId),a=Math.min(anchor,pos),b=Math.max(anchor,pos);
+  if(!toggle)shareSelectedIds.clear();
+  shareVisibleIds.slice(a,b+1).forEach(x=>shareSelectedIds.add(x));
+ }else if(toggle){
+  if(shareSelectedIds.has(id))shareSelectedIds.delete(id);else shareSelectedIds.add(id);
+ }else if(shareSelectedIds.size===1&&shareSelectedIds.has(id)){
+  shareSelectedIds.clear();
+ }else{shareSelectedIds.clear();shareSelectedIds.add(id)}
+ shareLastSelectedId=id;
+ shareRender();
+}
 const shareSortKey='hanil_workspace_share_sort_v1';
 let shareSortMode=['random','newest','oldest','manual'].includes(localStorage.getItem(shareSortKey))?localStorage.getItem(shareSortKey):'random';
 let shareRandomSeed=Math.floor(Math.random()*2147483647);
@@ -1217,7 +1247,8 @@ function shareDropTarget(el,action){
 function shareRender(){
  const inSession=!!cloudUser&&!!cloudClient;
  shareEl('shareLogin').hidden=inSession;shareEl('shareWorkspace').hidden=!inSession;
- if(!inSession)return;
+ if(!inSession){shareSelectedIds.clear();shareLastSelectedId=null;shareVisibleIds=[];return}
+ if(shareSelectionUserId!==cloudUser.id){shareSelectedIds.clear();shareLastSelectedId=null;shareSelectionUserId=cloudUser.id}
  const root=shareEl('shareRoot'),label=shareEl('shareFolderName');
  root.replaceChildren();
  const home=shareButton('자료공유',()=>{shareFolderId=null;shareQuery='';shareEl('shareSearch').value='';shareRender()});
@@ -1255,9 +1286,21 @@ function shareRender(){
   }
   return file.folder_id===shareFolderId;
  }).sort(shareFileSort);
+ shareVisibleIds=matches.map(f=>f.id);
  shareEl('shareCount').textContent=shareQuery?('검색 결과 '+matches.length+'개'):('파일 '+matches.length+'개 · 폴더 '+(shareFolderId?0:shareFolders.length)+'개');
  for(const file of matches){
   const row=document.createElement('div');row.className='share-file-row';
+  row.classList.toggle('share-file-selected',shareSelectedIds.has(file.id));
+  row.setAttribute('aria-selected',shareSelectedIds.has(file.id)?'true':'false');
+  row.onclick=e=>{
+   if(e.target.closest('button,input,a,select,textarea'))return;
+   shareSelectFile(file.id,e.shiftKey,e.ctrlKey||e.metaKey);
+  };
+  const pick=document.createElement('input');pick.type='checkbox';pick.className='share-select-check';
+  pick.checked=shareSelectedIds.has(file.id);
+  pick.setAttribute('aria-label',file.filename+' 선택');
+  pick.onclick=e=>{e.stopPropagation();shareSelectFile(file.id,e.shiftKey,true)};
+  row.prepend(pick);
   const main=document.createElement('div');main.className='share-file-main';
   const handle=document.createElement('span');handle.className='share-file-handle';handle.title=shareCanEdit(file)?'드래그하여 폴더로 이동'+(isWorkspaceAdmin?'하거나 순서 변경':''):'업로더만 이동 가능';handle.textContent=shareCanEdit(file)?'⠿':'';
   const icon=document.createElement('span');icon.className='share-file-icon';icon.textContent=shareIcon(file.filename);
@@ -1285,6 +1328,7 @@ function shareRender(){
   empty.textContent=shareQuery?'검색 결과가 없습니다.':'파일이 없습니다. 자료를 업로드해 보세요.';
   filesArea.append(empty);
  }
+ shareUpdateSelectionUI();
  shareEl('shareInstructions').textContent=isWorkspaceAdmin?'관리자: 모든 파일·폴더를 수정·삭제할 수 있습니다. 드래그로 파일을 폴더에 넣거나 항목의 순서를 변경하세요.':'내 파일은 드래그로 폴더에 이동할 수 있습니다. 순서 변경과 타인 파일 관리는 관리자만 가능합니다.';
 }
 async function shareLoad(){
@@ -1299,6 +1343,9 @@ async function shareLoad(){
   ]);
   if(role.error)throw role.error;if(a.error)throw a.error;if(b.error)throw b.error;
   isWorkspaceAdmin=role.data===true;shareFolders=a.data||[];shareFiles=b.data||[];
+  const known=new Set(shareFiles.map(f=>f.id));
+  shareSelectedIds=new Set([...shareSelectedIds].filter(id=>known.has(id)));
+  if(shareLastSelectedId&&!known.has(shareLastSelectedId))shareLastSelectedId=null;
   if(shareFolderId&&!shareFolders.some(x=>x.id===shareFolderId))shareFolderId=null;
   shareRender();shareStatus('모든 로그인 사용자에게 공유되는 자료입니다.');
  }catch(e){shareStatus('자료 불러오기 실패: '+e.message);shareRender()}
@@ -1364,6 +1411,40 @@ async function shareDownload(file){
   setTimeout(()=>URL.revokeObjectURL(url),30000);
   shareStatus('다운로드를 시작했습니다: '+file.filename);
  }catch(e){shareStatus('다운로드 실패: '+e.message)}
+}
+async function shareDownloadSelected(){
+ if(shareDownloading||!cloudUser||!cloudClient||!shareSelectedIds.size)return;
+ const chosen=shareFiles.filter(f=>shareSelectedIds.has(f.id));
+ if(!chosen.length)return;
+ const bytes=chosen.reduce((sum,f)=>sum+Number(f.size_bytes||0),0);
+ if(bytes>200*1024*1024){shareStatus('선택한 파일의 총 크기가 200MB를 넘습니다. 브라우저 ZIP 생성 한도를 고려하여 나누어 선택해 주세요.');return}
+ if(typeof JSZip==='undefined'){shareStatus('ZIP 압축 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.');return}
+ shareDownloading=true;shareUpdateSelectionUI();
+ const zip=new JSZip(),used=new Set();
+ try{
+  for(let i=0;i<chosen.length;i++){
+   const file=chosen[i];
+   shareStatus('ZIP 다운로드 준비 중 '+(i+1)+'/'+chosen.length+' · '+file.filename);
+   const {data,error}=await cloudClient.storage.from(shareBucket).download(file.storage_path);
+   if(error)throw Error(file.filename+': '+error.message);
+   const base=file.filename.replace(/[\\/]/g,'_')||'파일';
+   let unique=base,n=2;
+   while(used.has(unique.toLowerCase())){
+    const dot=base.lastIndexOf('.');
+    unique=dot>0?base.slice(0,dot)+' ('+n+++')'+base.slice(dot):base+' ('+n+++')';
+   }
+   used.add(unique.toLowerCase());zip.file(unique,data);
+  }
+  shareStatus('선택 파일 '+chosen.length+'개를 ZIP으로 압축하는 중…');
+  const zipped=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:3}});
+  const url=URL.createObjectURL(zipped),a=document.createElement('a');
+  const now=new Date(),pad=n=>String(n).padStart(2,'0');
+  a.href=url;a.download='Hanil_자료공유_'+now.getFullYear()+pad(now.getMonth()+1)+pad(now.getDate())+'_'+pad(now.getHours())+pad(now.getMinutes())+'.zip';
+  document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  shareStatus('선택한 '+chosen.length+'개 파일의 ZIP 다운로드를 시작했습니다.');
+ }catch(e){shareStatus('다중 다운로드 실패: '+(e.message||e))}
+ finally{shareDownloading=false;shareUpdateSelectionUI()}
 }
 async function shareDeleteFile(file){
  if(shareBusy||!shareCanEdit(file))return;
@@ -1461,6 +1542,9 @@ async function shareReplaceFile(file){
  };
  chooser.click();
 }
+shareEl('shareSelectAll').onclick=()=>{shareVisibleIds.forEach(id=>shareSelectedIds.add(id));shareLastSelectedId=shareVisibleIds.at(-1)||null;shareRender()};
+shareEl('shareClearSelection').onclick=()=>{shareSelectedIds.clear();shareLastSelectedId=null;shareRender()};
+shareEl('shareDownloadSelected').onclick=shareDownloadSelected;
 shareEl('shareSort').onchange=e=>shareSelectSort(e.target.value);
 shareEl('shareRefresh').onclick=shareLoad;
 shareEl('shareFolderButton').onclick=shareCreateFolder;
