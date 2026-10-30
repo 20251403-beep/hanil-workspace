@@ -51,3 +51,17 @@
 
 #shareSort{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer}
 #shareSort:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+
+/* Shared file multi-select and bulk download */
+.share-multiselect{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:13px}
+.share-select-summary{font-size:13px;font-weight:750;color:var(--text);min-width:65px}
+.share-multiselect button{border-radius:10px;padding:8px 11px;font-size:12px;cursor:pointer}
+.share-multiselect button:disabled{opacity:.45;cursor:not-allowed}
+.share-multiselect button.primary{margin-left:auto}
+.share-select-check{flex:none;cursor:pointer;width:17px;height:17px;accent-color:var(--accent)}
+.share-file-row{cursor:pointer;user-select:none;-webkit-user-select:none}
+.share-file-row.share-file-selected{border-color:var(--accent);background:var(--accent2)}
+.share-file-row .share-file-text{user-select:none;-webkit-user-select:none}
+.share-file-row button{user-select:none}
+@media(max-width:600px){.share-multiselect button.primary{margin-left:0;width:100%}}
