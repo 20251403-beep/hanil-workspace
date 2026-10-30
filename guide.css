@@ -1,0 +1,22 @@
+/* Hanil Workspace 기능 안내 */
+.hero-guide-action{display:flex;align-items:center;flex-shrink:0}
+.hero-guide-action button{padding:12px 17px;white-space:nowrap;box-shadow:0 5px 16px #a75e2b25}
+.guide-eyebrow{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.07em;color:var(--accent);margin-bottom:6px}
+.guide-intro{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;background:linear-gradient(125deg,var(--accent2),var(--panel));border:1px solid var(--line);border-radius:21px;padding:clamp(20px,3.5vw,35px);margin:15px 0 29px}
+.guide-intro-label{display:inline-block;border:1px solid var(--accent);color:var(--accent);border-radius:99px;padding:5px 10px;font-size:11px;font-weight:750}
+.guide-intro h3{font-size:clamp(21px,2.8vw,32px);letter-spacing:-.04em;line-height:1.35;margin:16px 0 12px}
+.guide-intro p{max-width:580px;color:var(--muted);font-size:14px;line-height:1.75;margin:0}
+.guide-intro button{flex-shrink:0}
+.guide-sections>h3{font-size:17px;margin:28px 0 12px;letter-spacing:-.03em}
+.guide-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.guide-card{display:flex;flex-direction:column;min-width:0;border:1px solid var(--line);background:var(--panel);border-radius:17px;padding:20px;box-shadow:var(--shadow)}
+.guide-card-accent{border-color:var(--accent);background:linear-gradient(150deg,var(--panel),var(--accent2))}
+.guide-card .guide-icon{width:45px;height:45px;display:grid;place-items:center;border-radius:13px;background:var(--accent2);font-size:23px;margin-bottom:14px}
+.guide-card h4{font-size:16px;margin:0 0 8px}
+.guide-card p{font-size:13px;line-height:1.75;color:var(--muted);margin:0 0 18px;flex:1}
+.guide-card button{align-self:flex-start;font-size:12px;padding:8px 11px}
+.guide-note{border:1px solid var(--line);background:var(--panel);border-radius:17px;padding:22px;margin:28px 0 16px}
+.guide-note strong{font-size:15px}.guide-note p{font-size:13px;color:var(--muted);line-height:1.8}
+.guide-note button{font-size:12px}
+@media(max-width:950px){.guide-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.hero-guide-action{width:100%;justify-content:flex-start}.hero-guide-action button{font-size:12px}.guide-intro{flex-direction:column;align-items:flex-start}.guide-intro button{width:100%}.guide-grid{grid-template-columns:1fr}.guide-card{padding:18px}.guide-card p{margin-bottom:14px}}
