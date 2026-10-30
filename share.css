@@ -34,3 +34,17 @@
 @media(max-width:600px){.share-file-row{align-items:flex-start;flex-direction:column}.share-file-buttons{align-self:flex-end}.share-toolbar{align-items:stretch}.share-toolbar input[type="search"]{width:100%}}
 
 .share-create[hidden],.share-login[hidden],#shareWorkspace[hidden]{display:none!important}
+
+/* Shared library drag, ordering, and administrative controls */
+.share-folder,.share-file-row{transition:border-color .15s ease,background .15s ease,transform .15s ease}
+.share-folder.share-drag-target,.share-file-row.share-drag-target,.share-breadcrumb.share-drag-target{border:2px dashed var(--accent)!important;background:var(--accent2)}
+.share-draggable{cursor:grab}
+.share-draggable:active{cursor:grabbing}
+.share-file-handle{color:var(--muted);font-size:19px;flex:none;cursor:grab;min-width:13px}
+.share-folder .share-quiet{font-size:11px;padding:5px 8px;border:1px solid var(--line);background:var(--bg);color:var(--muted)}
+.share-file-buttons{flex-wrap:wrap;justify-content:flex-end}
+.share-file-buttons button{font-size:12px;padding:8px 10px}
+.share-breadcrumb{border:2px solid transparent;border-radius:10px;padding:5px}
+.share-breadcrumb .share-home{font-weight:750}
+#shareInstructions{margin-top:12px;font-size:12px}
+@media(max-width:600px){.share-folder{flex-wrap:wrap}.share-file-buttons{width:100%}.share-file-buttons button{flex:1 1 auto}}
