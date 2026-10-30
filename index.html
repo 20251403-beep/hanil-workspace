@@ -565,7 +565,7 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
   <div class="cloud-status" id="cloudStatus">클라우드 설정을 확인하는 중…</div><div class="cloud-sync-note">음악/녹음 파일 자체는 동기화되지 않습니다. 일정·메모·설정은 기기 간 동기화되며 여러 기기에서 동시에 수정하면 마지막 저장이 우선할 수 있습니다.</div>
 </div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="./shared-zip.js?v=1"></script>
 <script src="./supabase-config.js"></script>
 <dialog id="eventDialog" style="border:1px solid var(--line);border-radius:20px;background:var(--panel);color:var(--text);width:min(560px,calc(100% - 24px));padding:24px;box-shadow:0 20px 80px #0003"><form id="eventForm"><div class="panel-head"><h2 id="eventDialogTitle">일정 추가</h2><button type="button" class="ghost" id="closeEventDialog">✕</button></div><div class="form-grid"><div class="field full" id="eventScopeField" hidden><label for="eventScope">일정 공개 범위</label><select id="eventScope"><option value="private">개인 일정 · 나만 보기</option><option value="shared">전체 일정 · 로그인한 모든 사용자</option></select><div class="tool-note" id="eventScopeHelp">전체 일정은 관리자만 등록할 수 있으며 모든 로그인 사용자에게 표시됩니다.</div></div><div class="field full"><label for="eventTitle">일정 제목 *</label><input id="eventTitle" required maxlength="200" placeholder="예: 수학 과제 제출"></div><div class="field"><label for="eventDate">날짜</label><input id="eventDate" type="date" required></div><div class="field full"><label>시간 선택 (선택)</label><div class="time-picker"><div class="period-switch"><button type="button" id="periodAM" class="active">오전</button><button type="button" id="periodPM">오후</button><button type="button" id="clearEventTime" class="ghost">시간 미정</button></div><div class="time-selects"><label class="time-number-field">시 <input id="eventHour" type="number" min="1" max="12" step="1" value="9" inputmode="numeric" aria-label="시간"></label><label class="time-number-field">분 <input id="eventMinute" type="number" min="0" max="59" step="1" value="0" inputmode="numeric" aria-label="분"></label></div><input id="eventTime" type="hidden" value=""></div><div class="reminder-row" style="margin-top:10px"><input id="eventReminder" type="checkbox" checked><label for="eventReminder" style="margin:0;color:var(--text);font-size:13px">일정 알림 받기</label><select id="reminderLead" aria-label="알림 시점"><option value="0">정시 알림</option><option value="5" selected>5분 전</option><option value="10">10분 전</option><option value="15">15분 전</option><option value="30">30분 전</option><option value="60">1시간 전</option></select></div><div class="reminder-note">브라우저 알림 권한이 필요합니다. 일정 알림은 이 HTML 페이지가 열려 있는 동안 작동하며, 브라우저를 완전히 종료하면 알림이 보장되지 않습니다.</div></div><div class="field full"><label for="eventDetail">상세 내용</label><textarea id="eventDetail" placeholder="장소, 준비물, 할 일 등을 적으세요."></textarea></div></div><div class="form-actions"><button type="button" class="danger hidden" id="deleteEventBtn">삭제</button><button type="submit" class="primary">저장</button></div></form></dialog>
 <script>
@@ -1418,9 +1418,9 @@ async function shareDownloadSelected(){
  if(!chosen.length)return;
  const bytes=chosen.reduce((sum,f)=>sum+Number(f.size_bytes||0),0);
  if(bytes>200*1024*1024){shareStatus('선택한 파일의 총 크기가 200MB를 넘습니다. 브라우저 ZIP 생성 한도를 고려하여 나누어 선택해 주세요.');return}
- if(typeof JSZip==='undefined'){shareStatus('ZIP 압축 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.');return}
+ if(!window.HanilZip){shareStatus('ZIP 압축 모듈을 불러오지 못했습니다. Ctrl + Shift + R로 새로고침해 주세요.');return}
  shareDownloading=true;shareUpdateSelectionUI();
- const zip=new JSZip(),used=new Set();
+ const selectedBlobs=[],used=new Set();
  try{
   for(let i=0;i<chosen.length;i++){
    const file=chosen[i];
@@ -1433,16 +1433,16 @@ async function shareDownloadSelected(){
     const dot=base.lastIndexOf('.');
     unique=dot>0?base.slice(0,dot)+' ('+n+++')'+base.slice(dot):base+' ('+n+++')';
    }
-   used.add(unique.toLowerCase());zip.file(unique,data);
+   used.add(unique.toLowerCase());selectedBlobs.push({name:unique,blob:data});
   }
   shareStatus('선택 파일 '+chosen.length+'개를 ZIP으로 압축하는 중…');
-  const zipped=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:3}});
+  const zipped=await window.HanilZip.create(selectedBlobs,(i,total)=>shareStatus('ZIP 생성 중 '+i+'/'+total+'개 처리 완료'));
   const url=URL.createObjectURL(zipped),a=document.createElement('a');
   const now=new Date(),pad=n=>String(n).padStart(2,'0');
   a.href=url;a.download='Hanil_자료공유_'+now.getFullYear()+pad(now.getMonth()+1)+pad(now.getDate())+'_'+pad(now.getHours())+pad(now.getMinutes())+'.zip';
   document.body.append(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),60000);
-  shareStatus('선택한 '+chosen.length+'개 파일의 ZIP 다운로드를 시작했습니다.');
+  shareStatus('선택한 '+chosen.length+'개 파일의 ZIP 다운로드를 시작했습니다. 다운로드 폴더를 확인하세요.');
  }catch(e){shareStatus('다중 다운로드 실패: '+(e.message||e))}
  finally{shareDownloading=false;shareUpdateSelectionUI()}
 }
