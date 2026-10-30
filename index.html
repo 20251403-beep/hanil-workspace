@@ -473,7 +473,7 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
    <div class="share-grid" id="shareFolders"></div>
    <input type="file" multiple id="sharePick" hidden>
    <div class="share-upload" id="shareDrop" role="button" tabindex="0" aria-label="파일 선택 또는 파일을 끌어놓아 업로드"><strong>📤 파일을 클릭하거나 여기로 끌어 놓으세요</strong><small id="shareFolderName">전체 자료에 파일 업로드</small><small>파일 한 개당 최대 20MB · 공유 파일은 로그인한 모든 사용자가 열람할 수 있습니다.</small></div>
-   <div class="share-toolbar"><strong>공유 파일</strong><span class="tool-note" id="shareCount"></span></div>
+   <div class="share-toolbar"><strong>공유 파일</strong><div class="share-tools"><label class="tool-note" for="shareSort">정렬</label><select id="shareSort" aria-label="공유 파일 정렬"><option value="random">랜덤</option><option value="newest">최신순</option><option value="oldest">오래된순</option><option value="manual">직접 지정순</option></select><span class="tool-note" id="shareCount"></span></div></div>
    <div id="shareFiles" class="share-files"></div>
    <p id="shareInstructions" class="tool-note"></p>
   </div>
@@ -1158,6 +1158,28 @@ $('#sharedSave').onclick=async()=>{
 
 /* Shared resource library - authenticated Supabase Storage */
 let shareFolderId=null,shareFolders=[],shareFiles=[],shareBusy=false,shareQuery='';
+const shareSortKey='hanil_workspace_share_sort_v1';
+let shareSortMode=['random','newest','oldest','manual'].includes(localStorage.getItem(shareSortKey))?localStorage.getItem(shareSortKey):'random';
+let shareRandomSeed=Math.floor(Math.random()*2147483647);
+function shareRandomRank(id){
+ let hash=(2166136261^shareRandomSeed)>>>0;
+ for(let i=0;i<id.length;i++){hash=Math.imul(hash^id.charCodeAt(i),16777619)>>>0}
+ return hash;
+}
+function shareFileSort(a,b){
+ if(shareSortMode==='newest')return b.created_at.localeCompare(a.created_at)||a.id.localeCompare(b.id);
+ if(shareSortMode==='oldest')return a.created_at.localeCompare(b.created_at)||a.id.localeCompare(b.id);
+ if(shareSortMode==='manual')return shareOrder(a,b);
+ return shareRandomRank(a.id)-shareRandomRank(b.id)||a.id.localeCompare(b.id);
+}
+function shareSelectSort(mode){
+ if(!['random','newest','oldest','manual'].includes(mode))return;
+ if(mode==='random')shareRandomSeed=Math.floor(Math.random()*2147483647);
+ shareSortMode=mode;
+ localStorage.setItem(shareSortKey,mode);
+ shareEl('shareSort').value=mode;
+ shareRender();
+}
 const shareBucket='hanil-shared',shareLimit=20*1024*1024;
 const shareEl=id=>document.getElementById(id);
 const shareStatus=message=>{shareEl('shareStatus').textContent=message};
@@ -1203,6 +1225,7 @@ function shareRender(){
  if(shareFolderId)root.append(document.createTextNode(' / '+shareCurrentFolderName()));
  label.textContent=shareFolderId?'현재 폴더에 파일 업로드':'전체 자료에 파일 업로드';
  shareEl('shareNewFolder').hidden=!!shareFolderId||!!shareQuery;
+ shareEl('shareSort').value=shareSortMode;
  const foldersArea=shareEl('shareFolders'),filesArea=shareEl('shareFiles');
  foldersArea.replaceChildren();filesArea.replaceChildren();
  const folderList=shareFolders.slice().sort(shareOrder);
@@ -1231,7 +1254,7 @@ function shareRender(){
    return (file.filename+' '+folderName).toLowerCase().includes(shareQuery);
   }
   return file.folder_id===shareFolderId;
- }).sort(shareOrder);
+ }).sort(shareFileSort);
  shareEl('shareCount').textContent=shareQuery?('검색 결과 '+matches.length+'개'):('파일 '+matches.length+'개 · 폴더 '+(shareFolderId?0:shareFolders.length)+'개');
  for(const file of matches){
   const row=document.createElement('div');row.className='share-file-row';
@@ -1413,7 +1436,7 @@ async function shareReorder(kind,sourceId,targetId){
    const {error}=await cloudClient.from(table).update({sort_order:order}).eq('id',items[i].id);
    if(error)throw error;
   }
-  await shareLoad();shareStatus('공유 목록 순서를 저장했습니다.');
+  shareSelectSort('manual');await shareLoad();shareStatus('공유 목록 순서를 저장했습니다. 정렬이 직접 지정순으로 변경됐습니다.');
  }catch(e){shareStatus('순서 저장 실패: '+e.message);await shareLoad()}
  finally{shareBusy=false}
 }
@@ -1438,6 +1461,7 @@ async function shareReplaceFile(file){
  };
  chooser.click();
 }
+shareEl('shareSort').onchange=e=>shareSelectSort(e.target.value);
 shareEl('shareRefresh').onclick=shareLoad;
 shareEl('shareFolderButton').onclick=shareCreateFolder;
 shareEl('shareFolderInput').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();shareCreateFolder()}};
