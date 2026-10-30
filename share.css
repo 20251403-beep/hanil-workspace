@@ -1,0 +1,34 @@
+
+/* Hanil Workspace: Shared library */
+.share-wrap{display:grid;gap:15px}
+.share-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.share-toolbar .share-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.share-toolbar input[type="search"]{width:min(350px,75vw);padding:11px 13px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px}
+.share-breadcrumb{display:flex;align-items:center;gap:8px;font-weight:750;flex-wrap:wrap}
+.share-breadcrumb button{border:0;background:none;font:inherit;color:var(--text);cursor:pointer;padding:5px}
+.share-create{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:12px}
+.share-create input{flex:1;min-width:160px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg);color:var(--text)}
+.share-create button,.share-toolbar button,.share-file-row button,.share-folder button{border-radius:10px;padding:9px 12px;cursor:pointer}
+.share-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.share-folder{display:flex;gap:9px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--panel);min-width:0}
+.share-folder-open{border:0!important;background:none!important;flex:1;min-width:0;text-align:left;display:flex;gap:8px;align-items:center;cursor:pointer;color:var(--text);font:inherit;font-weight:650}
+.share-folder-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.share-folder-delete{padding:5px 8px!important;border:1px solid var(--line)!important;background:var(--bg)!important;color:var(--muted)!important}
+.share-files{display:grid;gap:9px}
+.share-file-row{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px;display:flex;gap:12px;justify-content:space-between;align-items:center;min-width:0}
+.share-file-main{display:flex;gap:12px;min-width:0;align-items:center}
+.share-file-icon{background:var(--bg);border-radius:11px;padding:10px;font-size:22px}
+.share-file-text{min-width:0}
+.share-file-text strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.share-file-text small{font-size:11px;color:var(--muted);line-height:1.55}
+.share-file-buttons{display:flex;gap:6px;flex-shrink:0}
+.share-file-buttons button{background:var(--bg);color:var(--text);border:1px solid var(--line)}
+.share-file-buttons button.danger{color:#b32c25}
+.share-emptystate{padding:35px 14px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:16px}
+.share-status{color:var(--muted);font-size:12px;min-height:20px}
+.share-upload{border:2px dashed var(--line);border-radius:16px;background:var(--panel);text-align:center;padding:22px 12px;cursor:pointer}
+.share-upload:focus-visible{outline:2px solid var(--accent)}
+.share-upload.dragover{border-color:var(--accent);background:var(--accent2)}
+.share-upload small{display:block;color:var(--muted);margin-top:7px}
+.share-login{padding:30px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:15px}
+@media(max-width:600px){.share-file-row{align-items:flex-start;flex-direction:column}.share-file-buttons{align-self:flex-end}.share-toolbar{align-items:stretch}.share-toolbar input[type="search"]{width:100%}}
