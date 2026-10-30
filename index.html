@@ -1262,27 +1262,28 @@ async function shareUpload(files){
  const chosen=Array.from(files||[]);
  if(!chosen.length)return;
  shareBusy=true;shareEl('sharePick').disabled=true;
- let done=0;
+ let done=0,failed=0,failures=[];
  try{
   for(const file of chosen){
-   if(file.size>shareLimit){shareStatus(file.name+' : 최대 업로드 크기는 20MB입니다.');continue}
-   if(!file.name.trim()||file.name.length>240){shareStatus('파일 이름이 너무 깁니다.');continue}
-   const safeName=file.name.replace(/[\\/\x00-\x1f]/g,'_').slice(0,180);
-   const uuid=crypto.randomUUID(),path=cloudUser.id+'/'+uuid+'/'+safeName;
+   if(file.size>shareLimit){failed++;failures.push(file.name+': 파일 크기가 20MB를 초과합니다.');continue}
+   if(!file.name.trim()||file.name.length>240){failed++;failures.push(file.name+': 파일 이름은 240자 이내여야 합니다.');continue}
+   // Storage keys must be safe ASCII; preserve the original Korean filename in metadata.
+   const extension=(file.name.match(/\.([A-Za-z0-9]{1,12})$/)?.[1]||'bin').toLowerCase();
+   const uuid=crypto.randomUUID(),path=cloudUser.id+'/'+uuid+'/'+uuid+'.'+extension;
    shareStatus('업로드 중 ('+(done+1)+'/'+chosen.length+') · '+file.name);
    const uploaded=await cloudClient.storage.from(shareBucket).upload(path,file,{upsert:false,contentType:file.type||'application/octet-stream'});
-   if(uploaded.error){shareStatus('업로드 실패 ('+file.name+'): '+uploaded.error.message);continue}
+   if(uploaded.error){failed++;failures.push(file.name+': '+uploaded.error.message);continue}
    const {error}=await cloudClient.from('hw_share_files').insert({
     filename:file.name,folder_id:shareFolderId,owner_id:cloudUser.id,storage_path:path,size_bytes:file.size,mime_type:file.type||null
    });
    if(error){
     await cloudClient.storage.from(shareBucket).remove([path]);
-    shareStatus('자료 목록 저장 실패 ('+file.name+'): '+error.message);continue;
+    failed++;failures.push(file.name+': '+error.message);continue;
    }
    done++;
   }
   await shareLoad();
-  shareStatus('업로드 완료: '+done+'개 / '+chosen.length+'개');
+  shareStatus('업로드 완료 '+done+'개 / 실패 '+failed+'개'+(failures.length?' · '+failures.slice(0,2).join(' / '):''));
  }catch(e){shareStatus('업로드 중 오류: '+e.message)}
  finally{shareBusy=false;shareEl('sharePick').disabled=false;shareEl('sharePick').value=''}
 }
