@@ -32,3 +32,5 @@
 .share-upload small{display:block;color:var(--muted);margin-top:7px}
 .share-login{padding:30px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:15px}
 @media(max-width:600px){.share-file-row{align-items:flex-start;flex-direction:column}.share-file-buttons{align-self:flex-end}.share-toolbar{align-items:stretch}.share-toolbar input[type="search"]{width:100%}}
+
+.share-create[hidden],.share-login[hidden],#shareWorkspace[hidden]{display:none!important}
