@@ -1045,6 +1045,7 @@ async function refreshCloudSession(){
   const previous=cloudUser?.id;
   cloudUser=session?.user||null;
   updateCloudButton();
+  if(shareEl('shareView').classList.contains('active'))setTimeout(shareLoad,0);
   if(!cloudUser){cloudReady=false;isWorkspaceAdmin=false;sharedEvents=[];$('#sharedAdminPanel').hidden=true;renderSharedViews();return}
   if(event==='SIGNED_IN'&&previous!==cloudUser.id)setTimeout(()=>loadCloudState(true),0);
  });
