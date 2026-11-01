@@ -1124,6 +1124,40 @@ $('#backupBtn').onclick=async()=>{await persist();const blob=new Blob([JSON.stri
 
 function openCloudDialog(){ $('#cloudOverlay').classList.add('open'); }
 function closeCloudDialog(){ $('#cloudOverlay').classList.remove('open'); }
+// Live updates are notifications only: fetch fresh rows under existing RLS policies.
+let liveChannel=null,liveUserId=null,liveRefreshTimer=null;
+function scheduleLiveRefresh(){
+ if(liveRefreshTimer!==null)clearTimeout(liveRefreshTimer);
+ liveRefreshTimer=setTimeout(()=>{
+  liveRefreshTimer=null;
+  if(!cloudClient||!cloudUser)return;
+  if($('#boardView').classList.contains('active'))boardLoad().catch(console.error);
+  if($('#shareView').classList.contains('active'))shareLoad().catch(console.error);
+ },250);
+}
+function stopLiveSubscription(){
+ if(liveRefreshTimer!==null){clearTimeout(liveRefreshTimer);liveRefreshTimer=null}
+ if(liveChannel&&cloudClient)cloudClient.removeChannel(liveChannel).catch(console.warn);
+ liveChannel=null;liveUserId=null;
+}
+function syncLiveSubscription(){
+ const uid=cloudUser?.id||null;
+ if(uid===liveUserId&&liveChannel)return;
+ stopLiveSubscription();
+ if(!cloudClient||!uid)return;
+ liveUserId=uid;
+ const channel=cloudClient.channel('hanil-live-'+uid)
+  .on('postgres_changes',{event:'*',schema:'public',table:'hw_board_posts'},scheduleLiveRefresh)
+  .on('postgres_changes',{event:'*',schema:'public',table:'hw_board_profiles'},scheduleLiveRefresh)
+  .on('postgres_changes',{event:'*',schema:'public',table:'hw_share_files'},scheduleLiveRefresh)
+  .on('postgres_changes',{event:'*',schema:'public',table:'hw_share_folders'},scheduleLiveRefresh);
+ liveChannel=channel;
+ channel.subscribe(status=>{
+  if(liveChannel!==channel)return;
+  if(status==='SUBSCRIBED')scheduleLiveRefresh();
+  if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')console.warn('실시간 업데이트 연결이 불안정합니다. 새로고침으로 복구할 수 있습니다.');
+ });
+}
 async function refreshCloudSession(){
  const url=(window.HARU_SUPABASE_URL||'').trim(),key=(window.HARU_SUPABASE_ANON_KEY||'').trim();
  if(!url||!key||url.includes('YOUR_PROJECT')||key.includes('YOUR_SUPABASE')){cloudStatus('Supabase 연결 전입니다. 설정 파일에 프로젝트 URL과 공개용 키를 입력하세요.');return}
@@ -1134,6 +1168,7 @@ async function refreshCloudSession(){
   const previous=cloudUser?.id;
   cloudUser=session?.user||null;
   updateCloudButton();
+  syncLiveSubscription();
   if(shareEl('shareView').classList.contains('active'))setTimeout(shareLoad,0);
   if(cloudUser && previous!==cloudUser.id)setTimeout(()=>boardLoadProfile(true).catch(console.error),300);
   if(!cloudUser)boardClearSession();
@@ -1143,7 +1178,7 @@ async function refreshCloudSession(){
  });
  const {data,error}=await cloudClient.auth.getSession();
  if(error){cloudStatus('인증 확인 오류: '+error.message);return}
- cloudUser=data.session?.user||null;updateCloudButton();
+ cloudUser=data.session?.user||null;updateCloudButton();syncLiveSubscription();
  if(cloudUser)setTimeout(()=>boardLoadProfile(true).catch(console.error),500);else boardClearSession();
  if(cloudUser){await loadCloudState(true)}else cloudStatus('이메일 계정을 만들거나 로그인하세요.');
 }
@@ -1817,7 +1852,7 @@ async function init(){try{await openDB();const saved=await dbGet('state');if(sav
 renderCalcHistory();
 if(state.weeklyTimetable){for(const day of Object.values(state.weeklyTimetable)){if(!Array.isArray(day))continue;for(const lesson of day){if(!Array.isArray(lesson))continue;const corrections={'김동환T':'김동화T','윤은기T':'윤인욱T','김성하T':'김성아T','박만호T':'박민춘T'};if(corrections[lesson[1]])lesson[1]=corrections[lesson[1]]}}if(state.weeklyTimetable[5]?.[5]?.[0]==='D')state.weeklyTimetable[5][5][0]='선택D';}migratePostedTimetable();migratePeriodTimes();applyTheme();renderPresets();$('#byteText').value=typeof state.byteDraft==='string'?state.byteDraft:'';updateByteCounts();renderByteRecords();renderHeader();renderTimetable();setInterval(()=>{renderHeader();renderTimetable();renderToday()},60000);refreshCloudSession().catch(e=>console.error(e));setInterval(()=>{if(cloudClient&&cloudUser)refreshAdminAndShared().catch(e=>console.warn('공통 일정 갱신 실패:',e))},45000);clearSharedForm();renderToday();renderCalendar();updateAudioStatus();$('#headphoneOnly').checked=state.headphoneOnly!==false;$('#homeHeadphone').checked=state.headphoneOnly!==false;$('#angleMode').value=state.angleMode||'DEG';calcExpr=state.calc||'0';$('#calcScreen').value=calcExpr;try{recordingDirectoryHandle=await dbGet('recordingDirectory');if(recordingDirectoryHandle)$('#recordFolderStatus').textContent='저장 폴더 설정됨'}catch{}setupTimePicker();setPickedTime('');updateTimerUI();checkScheduleReminders();if(notificationInterval)clearInterval(notificationInterval);notificationInterval=setInterval(checkScheduleReminders,15000);if(state.timer.running){if(state.timer.deadline<=Date.now()){state.timer.remaining=0;state.timer.running=false;state.timer.deadline=0;persist()}else timerInterval=setInterval(updateTimerUI,200)}}
 window.addEventListener('beforeunload',()=>{stopMeter();if(recordStream)recordStream.getTracks().forEach(t=>t.stop());if(state.timer.running)state.timer.remaining=Math.max(0,Math.ceil((state.timer.deadline-Date.now())/1000));try{if(db){const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(state,'state')}}catch{}});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderHeader();updateTimerUI();checkScheduleReminders()}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderHeader();updateTimerUI();checkScheduleReminders();if(cloudUser)scheduleLiveRefresh()}});
 init();
 })();
 </script>
