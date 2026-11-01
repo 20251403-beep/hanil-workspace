@@ -258,7 +258,7 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
 .music-timer-actions button{flex:1;min-width:0;padding:10px 3px;font-size:12px}
 .alarm-dismiss{position:fixed;z-index:10000;bottom:20px;left:50%;transform:translateX(-50%);width:min(440px,calc(100vw - 28px));padding:12px 15px;border-radius:15px;border:1px solid var(--accent);background:var(--panel);box-shadow:0 12px 42px #0003;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .alarm-dismiss[hidden]{display:none!important}
-.alarm-dismiss button{flex-shrink:0}
+.alarm-dismiss button{flex-shrink:0}.alarm-dismiss-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.alarm-dismiss-actions button{font-size:12px;padding:9px 11px}@media(max-width:490px){.alarm-dismiss{flex-direction:column;align-items:stretch}.alarm-dismiss-actions button{flex:1}}
 .music-shell{display:grid;grid-template-columns:minmax(210px,.34fr) minmax(0,1fr);gap:16px;align-items:start}
 .music-sidebar,.music-main{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:18px;min-width:0}
 .music-section-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
@@ -575,7 +575,7 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
     </div>
   </div>
 </section>
-<div id="alarmDismiss" class="alarm-dismiss" hidden role="status"><strong>타이머 종료 · 알람 재생 중</strong><button type="button" class="primary" id="alarmDismissBtn">알람 끄기</button></div>
+<div id="alarmDismiss" class="alarm-dismiss" hidden role="status"><strong>타이머 종료 · 알람 재생 중</strong><div class="alarm-dismiss-actions"><button type="button" class="ghost" id="alarmRepeatBtn">같은 시간 후 다시 알림</button><button type="button" class="primary" id="alarmDismissBtn">알람 끄기</button></div></div>
 <section class="view" id="miniGamesView">
  <div class="view-top"><div><div class="eyebrow">MINI GAMES</div><h2>미니게임</h2><p class="tool-note">게임 카드를 클릭하면 아래에서 바로 실행됩니다. 게임마다 독립된 화면에서 진행됩니다.</p></div><button class="backbtn" data-view="homeView">← 홈으로</button></div>
  <div class="hg-games-grid">
@@ -924,7 +924,8 @@ async function alarm(){
  playCycle();alarmRepeatTimer=setInterval(playCycle,preset.period*1000);
  }catch(e){stopAlarmSound();showToast('이 브라우저에서는 알림음을 재생할 수 없습니다.')}}
 }
-$('#alarmDismissBtn').onclick=stopAlarmSound;
+$('#alarmDismissBtn').onclick=()=>stopAlarmSound();
+$('#alarmRepeatBtn').onclick=()=>{if(!alarmActive)return;const seconds=Math.max(1,Math.floor(Number(state.timer.duration)||0));stopAlarmSound();state.timer.remaining=seconds;state.timer.running=false;state.timer.deadline=0;$('#timerStart').click();showToast('같은 시간 후 다시 알림: '+Math.floor(seconds/60)+'분 '+seconds%60+'초');};
 function updateAudioStatus(){ $('#alarmPreset').value=alarmPresets[state.alarmPreset]?state.alarmPreset:'classic';$('#volume').value=state.volume;$('#volumeLabel').textContent=state.volume+'%';if($('#fullVolume')){$('#fullVolume').value=state.volume;$('#fullVolumeLabel').textContent=state.volume+'%';$('#fullHeadphone').checked=state.headphoneOnly!==false}$('#audioStatus').textContent=state.audioData?`선택된 음악: ${state.audioName||'업로드 파일'}`:'선택한 기본 알림음이 설정되어 있습니다.';if(state.audioData)$('#alarmAudio').src=state.audioData}
 $('#headphoneOnly').checked=state.headphoneOnly;$('#homeHeadphone').checked=state.headphoneOnly!==false;$('#homeHeadphone').onchange=()=>{$('#headphoneOnly').checked=$('#homeHeadphone').checked;$('#headphoneOnly').onchange()};$('#headphoneOnly').onchange=()=>{state.headphoneOnly=$('#headphoneOnly').checked;$('#homeHeadphone').checked=state.headphoneOnly;$('#fullHeadphone').checked=state.headphoneOnly;persist();showToast(state.headphoneOnly?'이어폰 감지 모드를 켰습니다.':'기기 스피커에서도 알람을 허용합니다.')};
 $('#volume').oninput=()=>{state.volume=Number($('#volume').value);$('#volumeLabel').textContent=state.volume+'%';$('#fullVolumeLabel').textContent=state.volume+'%';$('#alarmAudio').volume=state.volume/100;persistSoon()};
