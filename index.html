@@ -76,7 +76,7 @@ body.dark .calc-screen{background:#17191c!important}body.dark input[type=file]::
 @media(max-width:850px){.formula-grid{grid-template-columns:1fr}}
 
 
-.cloud-account-btn{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 12px;border-radius:12px;font-size:12px;font-weight:700;margin-right:8px}.cloud-overlay{position:fixed;inset:0;background:#16161688;z-index:1000;display:none;align-items:center;justify-content:center;padding:18px}.cloud-overlay.open{display:flex}.cloud-dialog{width:min(460px,100%);background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:0 25px 90px #0003}.cloud-dialog h2{margin:0 0 6px;font-size:22px}.cloud-dialog p{font-size:13px;color:var(--muted);line-height:1.6}.cloud-dialog label{display:block;font-size:12px;color:var(--muted);margin:12px 0 5px}.cloud-dialog input{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--bg);color:var(--text)}.cloud-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.cloud-actions button{flex:1}.cloud-status{font-size:12px;color:var(--muted);margin-top:12px;overflow-wrap:anywhere}.cloud-warn{background:var(--accent2);padding:10px;border-radius:10px;font-size:12px;line-height:1.55}
+.cloud-account-btn{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 12px;border-radius:12px;font-size:12px;font-weight:700;margin-right:8px}.cloud-password-wrap{position:relative}.cloud-password-wrap input{padding-right:54px}.cloud-password-toggle{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:42px;height:38px;display:grid;place-items:center;padding:0;background:transparent;border:0;color:var(--muted);font-size:20px;cursor:pointer}.cloud-password-toggle:hover{color:var(--text);background:var(--accent2)}.cloud-overlay{position:fixed;inset:0;background:#16161688;z-index:1000;display:none;align-items:center;justify-content:center;padding:18px}.cloud-overlay.open{display:flex}.cloud-dialog{width:min(460px,100%);background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:0 25px 90px #0003}.cloud-dialog h2{margin:0 0 6px;font-size:22px}.cloud-dialog p{font-size:13px;color:var(--muted);line-height:1.6}.cloud-dialog label{display:block;font-size:12px;color:var(--muted);margin:12px 0 5px}.cloud-dialog input{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--bg);color:var(--text)}.cloud-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.cloud-actions button{flex:1}.cloud-status{font-size:12px;color:var(--muted);margin-top:12px;overflow-wrap:anywhere}.cloud-warn{background:var(--accent2);padding:10px;border-radius:10px;font-size:12px;line-height:1.55}
 
 
 /* Weekly timetable on the home dashboard */
@@ -595,9 +595,9 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
 <dialog id="ttDialog" class="tt-dialog"><div class="tt-edit-head"><h2>시간표 설정</h2><button class="ghost" id="ttClose">닫기</button></div><p class="tool-note">과목과 선생님, 각 교시의 시작·종료 시간을 수정할 수 있습니다. 수업 시간은 학교별로 달라 기본값을 임시로 입력했습니다.</p><div class="tt-edit-scroll"><table id="ttEditGrid"><thead><tr><th>교시 / 시간</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th></tr></thead><tbody></tbody></table></div><div class="tt-dialog-actions"><button class="ghost" id="ttRestore">기본 시간표로 복원</button><button class="primary" id="ttSave">변경 사항 저장</button></div></dialog>
 <div class="cloud-overlay" id="cloudOverlay" role="dialog" aria-modal="true" aria-labelledby="cloudTitle"><div class="cloud-dialog">
   <h2 id="cloudTitle">계정 및 클라우드 동기화</h2><p>이메일 계정으로 로그인하면 일정·메모·설정이 기기 간 동기화됩니다. 녹음 파일 자체는 현재 버전에서 클라우드로 전송하지 않습니다.</p>
-  <div class="cloud-warn"><strong>처음 이용하는 경우 · 회원가입 방법</strong><ol style="margin:9px 0 0;padding-left:20px;line-height:1.8"><li>본인의 Gmail 주소와 앞으로 사용할 비밀번호(8자 이상)를 입력합니다.</li><li>아래의 <strong>계정 만들기</strong> 버튼을 누릅니다.</li><li>입력한 Gmail 받은편지함에서 Supabase 인증 메일을 열고 <strong>Confirm your email address</strong>를 클릭합니다. 메일이 보이지 않으면 스팸함도 확인하세요.</li><li>이메일 인증을 마친 뒤 이 화면으로 돌아와 같은 이메일과 비밀번호로 <strong>로그인</strong>합니다.</li></ol><p style="margin:8px 0 0">이미 계정을 만들었다면 이메일과 비밀번호를 입력하고 바로 로그인하세요.</p></div>
+  <div class="cloud-warn"><strong>처음 이용하는 경우 · 회원가입 방법</strong><ol style="margin:9px 0 0;padding-left:20px;line-height:1.8"><li>본인의 Gmail 주소와 앞으로 사용할 비밀번호를 입력합니다.</li><li>아래의 <strong>계정 만들기</strong> 버튼을 누릅니다.</li><li>입력한 Gmail 받은편지함에서 Supabase 인증 메일을 열고 <strong>Confirm your email address</strong>를 클릭합니다. 메일이 보이지 않으면 스팸함도 확인하세요.</li><li>이메일 인증을 마친 뒤 이 화면으로 돌아와 같은 이메일과 비밀번호로 <strong>로그인</strong>합니다.</li></ol><p style="margin:8px 0 0">이미 계정을 만들었다면 이메일과 비밀번호를 입력하고 바로 로그인하세요.</p></div>
   <label for="cloudEmail">이메일</label><input id="cloudEmail" type="email" autocomplete="username" placeholder="you@example.com">
-  <label for="cloudPassword">비밀번호</label><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="비밀번호">
+  <label for="cloudPassword">비밀번호</label><div class="cloud-password-wrap"><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="비밀번호"><button id="cloudPasswordToggle" class="cloud-password-toggle" type="button" aria-label="비밀번호 표시" aria-pressed="false" title="비밀번호 표시">👁</button></div>
   <div class="cloud-actions"><button class="primary" id="cloudLoginBtn">로그인</button><button id="cloudSignupBtn">계정 만들기</button></div>
   <div class="board-login-identity" id="boardLoginIdentity" hidden><label for="boardActivityInput">게시판 활동 아이디</label><input id="boardActivityInput" maxlength="20" autocomplete="off" placeholder="2~20자 · 회원에게 표시될 이름"><button class="primary" id="boardSaveActivity" type="button">활동 아이디 저장</button><p id="boardActivityStatus" class="tool-note">게시글을 올리려면 활동 아이디를 지정해야 합니다.</p></div>
   <div class="cloud-actions"><button class="ghost" id="cloudSyncBtn">지금 동기화</button><button class="ghost" id="cloudLogoutBtn">로그아웃</button><button class="ghost" id="cloudCloseBtn">닫기</button></div>
@@ -1172,6 +1172,7 @@ async function loadCloudState(firstLogin=false){
 async function manualCloudSync(){if(!cloudClient||!cloudUser){cloudStatus('먼저 로그인하세요.');return}await loadCloudState(false);if(cloudReady)location.reload()}
 $('#cloudAccountBtn').addEventListener('click',()=>{openCloudDialog();refreshCloudSession()});
 $('#cloudCloseBtn').onclick=closeCloudDialog;
+$('#cloudPasswordToggle').onclick=()=>{const field=$('#cloudPassword'),show=field.type==='password';field.type=show?'text':'password';const btn=$('#cloudPasswordToggle');btn.setAttribute('aria-pressed',String(show));btn.setAttribute('aria-label',show?'비밀번호 숨기기':'비밀번호 표시');btn.title=show?'비밀번호 숨기기':'비밀번호 표시';btn.textContent=show?'◉':'👁'};
 $('#cloudLoginBtn').onclick=async()=>{
  if(!cloudClient){await refreshCloudSession();if(!cloudClient)return}
  const email=$('#cloudEmail').value.trim(),password=$('#cloudPassword').value;
@@ -1183,7 +1184,7 @@ $('#cloudLoginBtn').onclick=async()=>{
 $('#cloudSignupBtn').onclick=async()=>{
  if(!cloudClient){await refreshCloudSession();if(!cloudClient)return}
  const email=$('#cloudEmail').value.trim(),password=$('#cloudPassword').value;
- if(!email||password.length<8){cloudStatus('이메일과 8자 이상의 비밀번호가 필요합니다.');return}
+ if(!email||!password){cloudStatus('이메일과 비밀번호를 입력하세요.');return}
  cloudStatus('계정을 생성하는 중…');
  const {data,error}=await cloudClient.auth.signUp({email,password,emailRedirectTo:location.origin+location.pathname});
  if(error)cloudStatus('계정 생성 실패: '+error.message);
