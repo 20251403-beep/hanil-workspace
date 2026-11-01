@@ -880,14 +880,17 @@ $('#timerFullAudioSettings').onclick=()=>$('#audioFile').click();$('#fullClearAu
 // Browsers cannot reliably identify the physical audio output (e.g. wired headphones).
 // Respect the OS output selection; do not suppress the alarm on an unreliable heuristic.
 async function headphonesConnected(){return true}
-let alarmAudioContexts=[];let alarmRepeatTimer=null;let alarmDeadlineTimer=null;let alarmActive=false;let alarmToken=0;
-function stopAlarmSound(){
- alarmToken++;alarmActive=false;
+let alarmAudioContexts=[];let alarmRepeatTimer=null;let alarmDeadlineTimer=null;let alarmActive=false;let alarmToken=0;let alarmPausedMusic=false;let alarmPausedMusicSource='';
+function stopAlarmSound(resumeMusic=true){
+ const music=$('#musicAudio');
+ const resume=resumeMusic&&alarmActive&&alarmPausedMusic&&music&&music.paused&&music.currentSrc===alarmPausedMusicSource;
+ alarmToken++;alarmActive=false;alarmPausedMusic=false;alarmPausedMusicSource='';
  if(alarmRepeatTimer!==null){clearInterval(alarmRepeatTimer);alarmRepeatTimer=null}
  if(alarmDeadlineTimer!==null){clearTimeout(alarmDeadlineTimer);alarmDeadlineTimer=null}
  const notice=$('#alarmDismiss');if(notice)notice.hidden=true;
  const a=$('#alarmAudio');try{a.pause();a.loop=false;a.currentTime=0}catch(e){}
  alarmAudioContexts.forEach(ctx=>{try{ctx.close().catch(()=>{})}catch(e){}});alarmAudioContexts=[];
+ if(resume)music.play().catch(e=>console.warn('알람 종료 후 음악 자동 재개 실패:',e));
 }
 const alarmPresets={
  classic:{period:1.05,notes:[{at:0,frequencies:[880],duration:.2},{at:.25,frequencies:[660],duration:.2},{at:.5,frequencies:[880],duration:.2}]},
@@ -906,8 +909,9 @@ function scheduleAlarmNote(ctx,n,start){
  });
 }
 async function alarm(){
- stopAlarmSound();const token=alarmToken;
- const music=$('#musicAudio');if(music&&!music.paused)music.pause();
+ stopAlarmSound(false);const token=alarmToken;
+ const music=$('#musicAudio');alarmPausedMusic=!!(music&&!music.paused);alarmPausedMusicSource=alarmPausedMusic?music.currentSrc:'';
+ if(alarmPausedMusic)music.pause();
  alarmActive=true;$('#alarmDismiss').hidden=false;
  alarmDeadlineTimer=setTimeout(stopAlarmSound,180000);
  const a=$('#alarmAudio');
@@ -1925,7 +1929,7 @@ const del=key=>new Promise((ok,no)=>{const r=store('readwrite').delete(key);r.on
 async function open(){return new Promise((ok,no)=>{const q=indexedDB.open('hanil-music-library',1);q.onupgradeneeded=()=>{if(!q.result.objectStoreNames.contains('kv'))q.result.createObjectStore('kv')};q.onsuccess=()=>{db=q.result;ok()};q.onerror=()=>no(q.error)})}
 const cur=()=>meta.lists.find(l=>l.id===meta.selected)||meta.lists[0];
 const save=()=>put('meta',meta);
-function updatePlayer(){const track=cur().tracks.find(t=>t.id===activeId);$('#musicNowTitle').textContent=track?track.name:'재생할 곡을 선택해 주세요';$('#musicPlayPause').textContent=audio.paused?'▶ 재생':'Ⅱ 일시정지';}
+function updatePlayer(){const track=cur().tracks.find(t=>t.id===activeId);$('#musicNowTitle').textContent=track?track.name:'재생할 곡을 선택해 주세요';$('#musicPlayPause').textContent=audio.paused?'▶ 재생':'Ⅱ 일시정지';if('mediaSession'in navigator){navigator.mediaSession.playbackState=audio.paused?'paused':'playing';if('MediaMetadata'in window)navigator.mediaSession.metadata=track?new MediaMetadata({title:track.name,artist:'Hanil Workspace',album:cur().name}):null;}}
 let dragState=null;
 function attachReorder(handle,row,kind,entryId){
  handle.draggable=true;handle.setAttribute('aria-label',kind==='track'?'곡 순서 이동':'플레이리스트 순서 이동');handle.title='잡고 끌어 순서 변경';
@@ -1981,6 +1985,22 @@ async function collectOrphans(removed){for(const t of removed){if(!meta.lists.so
 function stop(){audio.pause();audio.removeAttribute('src');audio.load();if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null}activeId=null;$('#musicSeek').value=0;$('#musicCurrentTime').textContent='0:00';$('#musicDuration').textContent='0:00';updatePlayer()}
 async function playTrack(trackId){if(loading)return;const track=cur().tracks.find(t=>t.id===trackId);if(!track)return;loading=true;try{const file=await get('file:'+trackId);if(!file){status('해당 곡의 파일이 이 기기에 없습니다. 다시 업로드해 주세요.');return}audio.pause();if(currentUrl)URL.revokeObjectURL(currentUrl);currentUrl=URL.createObjectURL(file);audio.src=currentUrl;activeId=trackId;render();await audio.play();updatePlayer();status(`재생 중: ${track.name}`)}catch(e){console.error(e);status('재생할 수 없습니다: '+(e.message||'지원되지 않는 오디오 형식'))}finally{loading=false}}
 function next(direction=1){const tracks=cur().tracks;if(!tracks.length)return;let idx=tracks.findIndex(t=>t.id===activeId);if(direction===1&&meta.shuffle&&tracks.length>1){let n=Math.floor(Math.random()*(tracks.length-1));if(n>=idx)n++;idx=n}else idx+=direction;if(idx<0)idx=meta.repeat==='all'?tracks.length-1:0;if(idx>=tracks.length){if(meta.repeat==='all')idx=0;else{stop();return}}playTrack(tracks[idx].id)}
+// Bluetooth/wired headset media controls and OS lock-screen controls.
+if('mediaSession'in navigator){
+ const handlers={
+  play:()=>{if(audio.paused)$('#musicPlayPause').click()},
+  pause:()=>{if(!audio.paused)audio.pause()},
+  previoustrack:()=>next(-1),
+  nexttrack:()=>next(1),
+  stop:()=>stop(),
+  seekto:e=>{if(Number.isFinite(audio.duration)&&Number.isFinite(e.seekTime))audio.currentTime=Math.max(0,Math.min(audio.duration,e.seekTime))},
+  seekbackward:e=>{audio.currentTime=Math.max(0,audio.currentTime-(e.seekOffset||10))},
+  seekforward:e=>{if(Number.isFinite(audio.duration))audio.currentTime=Math.min(audio.duration,audio.currentTime+(e.seekOffset||10))}
+ };
+ for(const [action,handler] of Object.entries(handlers)){
+  try{navigator.mediaSession.setActionHandler(action,handler)}catch(e){console.warn('미지원 미디어 제어:',action)}
+ }
+}
 $('#musicNewList').onclick=async()=>{const name=prompt('새 플레이리스트 이름','새 플레이리스트')?.trim();if(!name)return;const l={id:id(),name,tracks:[]};meta.lists.push(l);meta.selected=l.id;stop();await save();render()};
 $('#musicFiles').onchange=async e=>{const files=[...e.target.files];e.target.value='';if(!files.length)return;status(`${files.length}개 파일을 저장하는 중…`);let count=0;for(const file of files){if(!file.type.startsWith('audio/')&&!/\.(mp3|m4a|wav|ogg|flac|webm|aac)$/i.test(file.name))continue;const key=id();try{await put('file:'+key,file);cur().tracks.push({id:key,name:file.name.replace(/\.[^.]+$/,'')});count++}catch(err){console.error(err);status('저장 공간이 부족하거나 브라우저 저장이 제한되어 일부 파일을 저장하지 못했습니다.');break}}await save();render();status(`${count}곡을 추가했습니다. 음악 파일은 현재 기기에 저장됩니다.`)};
 $('#musicPlayPause').onclick=async()=>{if(!activeId){if(cur().tracks.length)await playTrack(cur().tracks[0].id);return}if(audio.paused)audio.play().then(updatePlayer).catch(e=>status('재생 오류: '+e.message));else{audio.pause();updatePlayer()}};
