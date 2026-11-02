@@ -22,7 +22,7 @@ main{max-width:1280px;margin:auto;padding:28px clamp(14px,3vw,36px) 50px}.hero{d
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field.full{grid-column:1/-1}.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}.hidden{display:none!important}
 .calc-layout{display:grid;grid-template-columns: minmax(280px,440px) minmax(250px,1fr);gap:20px;align-items:start}.calc-screen{font-size:32px;font-weight:750;text-align:right;padding:22px 14px;margin-bottom:12px;min-height:83px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.calc-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.calc-grid button{padding:13px 3px;font-size:15px;min-width:0}.calc-screen{width:100%;font-size:27px!important}.calc-grid button.operator{background:var(--accent2);color:var(--accent)}.calc-grid button.equal{background:var(--accent);color:white}.tool-note{font-size:13px;color:var(--muted);line-height:1.6}
 .byte-result{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}.byte-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.byte-records{display:grid;gap:8px;margin-top:14px}.byte-record{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.byte-record-main{min-width:0;flex:1}.byte-record-main strong{display:block;overflow-wrap:anywhere}.byte-record-main small{display:block;color:var(--muted);margin-top:4px}.byte-record-actions{display:flex;gap:6px;flex-wrap:wrap}.byte-record-actions button{padding:7px 10px;font-size:12px}.metric{background:var(--bg);border:1px solid var(--line);padding:14px;border-radius:14px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:22px;margin-top:5px;overflow-wrap:anywhere}
-.notes-layout{display:grid;grid-template-columns: minmax(230px,.75fr) minmax(0,1.5fr);gap:18px;align-items:start}.notes-sidebar,.note-editor{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}.notes-list{display:flex;flex-direction:column;gap:7px;margin-top:13px;max-height:65vh;overflow:auto}.note-item{padding:12px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:var(--bg)}.note-item.selected{border-color:var(--accent);background:var(--accent2)}.note-item strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.note-item small{display:block;color:var(--muted);margin-top:5px}.editor-toolbar{display:flex;gap:6px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line);margin-bottom:12px}.editor-toolbar button{padding:7px 10px;border-radius:8px}.editor-toolbar input[type=color]{width:36px;height:34px;padding:3px}.editor-toolbar select{width:auto;padding:5px}.note-title{font-size:21px;font-weight:750;margin-bottom:12px}.note-content{min-height:340px;outline:none;overflow-wrap:anywhere;line-height:1.7}.note-content:empty:before{content:"메모 내용을 자유롭게 작성하세요.";color:var(--muted)}.note-content:focus{outline:none}
+.notes-layout{display:grid;grid-template-columns: minmax(230px,.75fr) minmax(0,1.5fr);gap:18px;align-items:start}.notes-sidebar,.note-editor{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}.notes-list{display:flex;flex-direction:column;gap:7px;margin-top:13px;max-height:65vh;overflow:auto}.note-item{padding:12px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:var(--bg)}.note-item.selected{border-color:var(--accent);background:var(--accent2)}.note-item strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.note-item small{display:block;color:var(--muted);margin-top:5px}.editor-toolbar{display:flex;gap:6px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line);margin-bottom:12px}.editor-toolbar button{padding:7px 10px;border-radius:8px}.editor-toolbar input[type=color]{width:36px;height:34px;padding:3px}.editor-toolbar select{width:auto;padding:5px}.note-title{font-size:21px;font-weight:750;margin-bottom:12px}.note-content{min-height:340px;outline:none;overflow-wrap:anywhere;line-height:1.7}.note-content:empty:before{content:"메모 내용을 자유롭게 작성하세요.";color:var(--muted)}.note-content:focus{outline:none}.admin-name-badge{display:inline-flex;align-items:center;margin-left:7px;padding:2px 7px;border-radius:6px;background:#df792f;color:#fff;font-size:11px;font-weight:800;line-height:1.6;vertical-align:middle}
 /* The default black palette swatch follows the active theme, including saved rich-text colors. */
 #colorPalette [data-color="#292824"]{background:var(--text)!important;border:1px solid var(--line)}
 body.dark #noteContent font[color="#292824"],body.dark #noteContent font[color="#292824" i],body.dark #noteContent [style*="color: rgb(41, 40, 36)"],body.dark #noteContent [style*="color:#292824"],body.dark #noteContent [style*="color: #292824"]{color:var(--text)!important}
@@ -427,7 +427,7 @@ body.dark .side-brand .brand-dot img{filter:none;mix-blend-mode:normal}
   </nav>
   <div class="sidebar-bottom"><button class="side-link" id="backupBtn"><span>⚙</span> 데이터 백업</button></div>
 </aside>
-<header><div class="header-spacer"></div><div class="header-right"><button class="cloud-account-btn" id="cloudAccountBtn">로그인 / 동기화</button><span class="today-label" id="headerDate"></span><span class="header-clock" id="headerTime" aria-label="현재 시각">--:--:--</span><button class="icon-btn ghost" id="themeBtn" title="밝기 전환" aria-label="밝기 전환"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></button></div></header>
+<header><div class="header-spacer"></div><div class="header-right"><button class="cloud-account-btn" id="cloudAccountBtn">로그인 / 동기화</button><span id="accountAdminBadge" class="admin-name-badge" hidden>관리자</span><span class="today-label" id="headerDate"></span><span class="header-clock" id="headerTime" aria-label="현재 시각">--:--:--</span><button class="icon-btn ghost" id="themeBtn" title="밝기 전환" aria-label="밝기 전환"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></button></div></header>
 <main>
 <section class="view" id="guideView" aria-labelledby="guideTitle"><div class="view-top"><div><span class="guide-eyebrow">이용 안내</span><h2 id="guideTitle">한일 워크스페이스 기능 설명</h2><p class="tool-note">필요한 기능을 선택하면 해당 탭으로 바로 이동합니다.</p></div><button class="backbtn" data-view="homeView">← 홈으로</button></div><div class="guide-intro"><div><span class="guide-intro-label">한눈에 보는 이용 방법</span><h3>오늘의 일정부터 공동 자료까지,<br>필요한 기능을 빠르게 찾아보세요.</h3><p>개인 기록은 내 작업 공간에서, 게시판과 자료공유는 로그인한 회원들과 함께 이용할 수 있습니다.</p></div><button class="primary" data-view="homeView">홈으로 돌아가기</button></div><div class="guide-sections"><h3>일정과 집중</h3><div class="guide-grid"><article class="guide-card"><span class="guide-icon">⌂</span><h4>홈 대시보드</h4><p>오늘의 일정·시간표, 타이머, 음악과 녹음 기능을 한 화면에서 확인합니다.</p><button class="ghost" data-view="homeView">홈 열기 ↗</button></article><article class="guide-card"><span class="guide-icon">▦</span><h4>일정 달력</h4><p>날짜별 일정을 등록하고 확인합니다. 개인 일정은 계정 동기화를 이용할 수 있으며 공통 일정은 회원이 함께 확인합니다.</p><button class="ghost" data-view="calendarView">일정 열기 ↗</button></article><article class="guide-card"><span class="guide-icon">◷</span><h4>타이머</h4><p>시간을 설정하고 시작·일시정지·초기화하며 공부 시간을 관리합니다.</p><button class="ghost" data-view="timerView">타이머 열기 ↗</button></article></div><h3>회원들과 함께</h3><div class="guide-grid"><article class="guide-card guide-card-accent"><span class="guide-icon">▤</span><h4>공유 게시판</h4><p>로그인 후 활동 아이디를 설정하고 글을 올립니다. 로그인한 회원 모두가 읽을 수 있으며 작성자는 자기 글을 수정하거나 삭제할 수 있습니다.</p><button class="ghost" data-view="boardView">게시판 열기 ↗</button></article><article class="guide-card guide-card-accent"><span class="guide-icon">▣</span><h4>자료공유</h4><p>파일을 올리고 검색·다운로드합니다. 여러 파일을 ZIP으로 받을 수 있으며 폴더 관리 권한은 관리자에게 있습니다.</p><button class="ghost" data-view="shareView">자료공유 열기 ↗</button></article></div><h3>나만의 작업 도구</h3><div class="guide-grid"><article class="guide-card"><span class="guide-icon">▧</span><h4>메모장</h4><p>공부 내용이나 생각을 개인 메모로 작성하고 다시 확인합니다.</p><button class="ghost" data-view="notesView">메모장 열기 ↗</button></article><article class="guide-card"><span class="guide-icon">▤</span><h4>바이트 계산기</h4><p>텍스트의 바이트 수를 확인해 글자 수 제한이 있는 문서를 작성할 때 활용합니다.</p><button class="ghost" data-view="byteView">계산기 열기 ↗</button></article><article class="guide-card"><span class="guide-icon">◉</span><h4>녹음</h4><p>마이크로 소리를 녹음하고 녹음 상태와 파형을 확인합니다. 브라우저 마이크 권한이 필요합니다.</p><button class="ghost" data-view="recordView">녹음 열기 ↗</button></article><article class="guide-card"><span class="guide-icon">♫</span><h4>음악</h4><p>음악과 플레이리스트를 관리하고 재생하며 홈의 음악 재생기와 연결됩니다.</p><button class="ghost" data-view="musicView">음악 열기 ↗</button></article><article class="guide-card"><span class="guide-icon">▣</span><h4>미니게임</h4><p>쉬는 시간에 즐길 수 있는 게임 모음입니다.</p><button class="ghost" data-view="miniGamesView">미니게임 열기 ↗</button></article></div><div class="guide-note"><strong>계정과 데이터 안내</strong><p>오른쪽 위 ‘로그인 / 동기화’에서 계정을 관리할 수 있습니다. 데이터 백업은 왼쪽 메뉴 아래쪽에 그대로 남아 있습니다. 일부 로컬 파일은 계정 로그인만으로 다른 기기에 옮겨지지 않을 수 있습니다.</p><button class="ghost" type="button" id="guideOpenAccount">로그인 / 계정 관리</button></div></div></section>
 <section class="view active" id="homeView">
@@ -1196,7 +1196,7 @@ async function refreshCloudSession(){
  if(cloudUser)setTimeout(()=>boardLoadProfile(true).catch(console.error),500);else boardClearSession();
  if(cloudUser){await loadCloudState(true)}else cloudStatus('이메일 계정을 만들거나 로그인하세요.');
 }
-function updateCloudButton(){ $('#cloudAccountBtn').textContent=cloudUser?'계정 · '+(cloudUser.email||'로그인됨'):'로그인 / 동기화'; }
+function updateCloudButton(){ $('#cloudAccountBtn').textContent=cloudUser?'계정 · '+(cloudUser.email||'로그인됨'):'로그인 / 동기화';$('#accountAdminBadge').hidden=!cloudUser||!isWorkspaceAdmin; }
 async function loadCloudState(firstLogin=false){
  if(!cloudClient||!cloudUser||cloudLoadBusy)return;
  cloudLoadBusy=true;cloudReady=false;
@@ -1254,7 +1254,7 @@ async function refreshAdminAndShared(){
  ]);
  if(roleResult.error)throw roleResult.error;
  if(eventsResult.error)throw eventsResult.error;
- isWorkspaceAdmin=roleResult.data===true;
+ isWorkspaceAdmin=roleResult.data===true;updateCloudButton();
  sharedEvents=eventsResult.data||[];
  $('#sharedAdminPanel').hidden=!isWorkspaceAdmin;
  renderSharedViews();
@@ -1477,7 +1477,7 @@ async function shareLoad(){
    cloudClient.from('hw_share_files').select('id,filename,folder_id,owner_id,storage_path,size_bytes,mime_type,created_at,sort_order').order('sort_order',{ascending:true}).limit(3000)
   ]);
   if(role.error)throw role.error;if(a.error)throw a.error;if(b.error)throw b.error;
-  isWorkspaceAdmin=role.data===true;shareFolders=a.data||[];shareFiles=b.data||[];
+  isWorkspaceAdmin=role.data===true;updateCloudButton();shareFolders=a.data||[];shareFiles=b.data||[];
   const known=new Set(shareFiles.map(f=>f.id));
   shareSelectedIds=new Set([...shareSelectedIds].filter(id=>known.has(id)));
   if(shareLastSelectedId&&!known.has(shareLastSelectedId))shareLastSelectedId=null;
@@ -1705,12 +1705,13 @@ shareDropTarget(shareEl('shareRoot'),(payload,files)=>{
 shareRender();
 
 /* Hanil Workspace shared board, backed by Supabase Auth + RLS */
-let boardProfile=null,boardPosts=[],boardProfiles=new Map(),boardEditingId=null;
+let boardProfile=null,boardPosts=[],boardProfiles=new Map(),boardAdminIds=new Set(),boardEditingId=null;
+function adminBadge(){const b=document.createElement('span');b.className='admin-name-badge';b.textContent='관리자';return b}
 let boardBusy=false,boardPromptedFor=null,boardSessionId=null;
 const boardEl=id=>document.getElementById(id);
 const boardStatus=msg=>{boardEl('boardStatus').textContent=msg};
 function boardClearSession(){
- boardProfile=null;boardPosts=[];boardProfiles=new Map();boardEditingId=null;boardSessionId=null;boardPromptedFor=null;
+ boardProfile=null;boardPosts=[];boardProfiles=new Map();boardAdminIds=new Set();boardEditingId=null;boardSessionId=null;boardPromptedFor=null;
  boardEl('boardLoginIdentity').hidden=true;boardEl('boardActivityInput').value='';
  boardRender();
 }
@@ -1720,7 +1721,7 @@ function boardRender(){
  boardEl('boardWorkspace').hidden=!signed;
  boardEl('boardLoginIdentity').hidden=!signed;
  if(!signed){boardStatus('게시판을 이용하려면 로그인하세요.');return}
- boardEl('boardMyName').textContent=boardProfile?.activity_id||'미설정';
+ boardEl('boardMyName').textContent=boardProfile?.activity_id||'미설정';if(isWorkspaceAdmin)boardEl('boardMyName').append(adminBadge());
  boardEl('boardActivityInput').value=boardProfile?.activity_id||boardEl('boardActivityInput').value;
  const query=boardEl('boardSearch').value.trim().toLowerCase();
  const items=boardPosts.filter(p=>{
@@ -1735,7 +1736,7 @@ function boardRender(){
   const line=document.createElement('div');line.className='board-post-meta';
   const author=document.createElement('strong');author.textContent=boardProfiles.get(post.author_id)||'알 수 없는 사용자';
   const date=document.createElement('span');date.textContent=new Date(post.created_at).toLocaleString('ko-KR');
-  line.append(author,date);
+  line.append(author);if(boardAdminIds.has(post.author_id))line.append(adminBadge());line.append(date);
   if(post.updated_at&&post.updated_at!==post.created_at){const edit=document.createElement('span');edit.textContent='수정됨';line.append(edit)}
   const body=document.createElement('p');body.className='board-post-body';body.textContent=post.body;
   article.append(title,line,body);
@@ -1772,15 +1773,16 @@ async function boardLoad(){
  const uid=cloudUser.id;
  try{
   boardStatus('게시글을 불러오는 중…');
-  const [a,b,c]=await Promise.all([
+  const [a,b,c,d]=await Promise.all([
    cloudClient.from('hw_board_profiles').select('user_id,activity_id').limit(3000),
    cloudClient.from('hw_board_posts').select('id,author_id,title,body,created_at,updated_at').order('created_at',{ascending:false}).limit(200),
-   cloudClient.rpc('is_workspace_admin')
+   cloudClient.rpc('is_workspace_admin'),
+   cloudClient.rpc('hw_board_admin_ids')
   ]);
-  if(a.error)throw a.error;if(b.error)throw b.error;if(c.error)throw c.error;
+  if(a.error)throw a.error;if(b.error)throw b.error;if(c.error)throw c.error;if(d.error)console.warn('관리자 배지 조회 실패:',d.error);
   if(cloudUser?.id!==uid)return;
   boardProfiles=new Map((a.data||[]).map(p=>[p.user_id,p.activity_id]));
-  boardPosts=b.data||[];isWorkspaceAdmin=c.data===true;
+  boardPosts=b.data||[];boardAdminIds=new Set((d.data||[]).map(x=>x.user_id));isWorkspaceAdmin=c.data===true;updateCloudButton();
   boardProfile=(a.data||[]).find(p=>p.user_id===uid)||null;
   boardEl('boardLoginIdentity').hidden=false;
   boardEl('boardActivityInput').value=boardProfile?.activity_id||'';
